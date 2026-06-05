@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente de Ajedrez - Stockfish + Gemini</title>
+    
+    <!-- CDNs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #0f3460;
+            --bg-dark: #16213e;
+            --bg-darker: #1a1a2e;
+            --accent: #00b894;
+            --text: #e9ecef;
+            --white: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-darker);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--bg-deep);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .left-col {
+            flex: 1;
+            min-width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .right-col {
+            flex: 1;
+            min-width: 350px;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            background-color: var(--bg-dark);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Board Styling */
+        #myBoard {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .highlight-best {
+            box-shadow: inset 0 0 3px 3px yellow;
+        }
+
+        .move-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.62rem;
+            font-weight: 900;
+            color: #fff;
+            z-index: 9;
+            pointer-events: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+            line-height: 1;
+        }
+
+        /* Controls */
+        .card {
+            background-color: var(--bg-dark);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        input[type="text"], input[type="password"], textarea {
+            background-color: var(--bg-darker);
+            border: 1px solid var(--bg-deep);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        /* Analysis Results */
+        #analysis-results {
+            margin-top: 10px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-deep);
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+
+        /* Chat Styling */
+        .chat-header {
+            background-color: var(--bg-deep);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--accent);
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background-color: var(--bg-deep);
+            color: var(--text);
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.stockfish-card {
+            align-self: flex-start;
+            background-color: #0d2137;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            border-bottom-left-radius: 2px;
+            padding: 12px 15px;
+            max-width: 95%;
+            width: 95%;
+        }
+
+        .chat-toolbar {
+            padding: 8px 15px;
+            background-color: var(--bg-darker);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background-color: var(--bg-deep);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        #btn-analyze {
+            font-size: 0.82rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            background-color: var(--bg-darker);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area textarea {
+            flex: 1;
+            resize: none;
+            height: 40px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* Board Toolbar */
+        .board-toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .board-toolbar button {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        #btn-edit { background-color: var(--bg-deep); }
+        #btn-edit.active { background-color: #e17055; }
+        #btn-clear { background-color: #636e72; }
+        #btn-reset { background-color: #636e72; }
+
+
+
+        #edit-hint {
+            font-size: 0.75rem;
+            color: #e17055;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            background: rgba(225, 112, 85, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(225, 112, 85, 0.3);
+        }
+
+        #myBoard.edit-mode {
+            outline: 2px solid #e17055;
+            border-radius: 4px;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            padding: 15px;
+        }
+
+        .stats-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-item {
+            flex: 1;
+            background-color: var(--bg-deeper, #0a2744);
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+
+        .stat-pv {
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+        }
+
+        .pv-text {
+            color: #ccc;
+            font-family: monospace;
+            margin-left: 6px;
+            word-break: break-all;
+        }
+
+        /* Accuracy Panel */
+        #accuracy-panel {
+            margin-top: 10px;
+            padding: 12px 15px;
+        }
+        #accuracy-panel .panel-title {
+            font-size: 0.7rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        #accuracy-panel .acc-detail {
+            font-size: 0.67rem;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        /* Piece Palette */
+        #piece-palette {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .palette-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .palette-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .palette-piece {
+            width: 46px;
+            height: 46px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            padding: 2px;
+            background: rgba(255,255,255,0.05);
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .palette-piece:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .palette-piece { cursor: grab; }
+
+        .palette-ghost {
+            position: fixed;
+            width: 52px;
+            height: 52px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.85;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Turn selector */
+        #turn-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .turn-label {
+            font-size: 0.82rem;
+            color: #aaa;
+        }
+
+        .turn-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            font-size: 0.82rem;
+            border-radius: 6px;
+            background: var(--bg-deep);
+            color: var(--text);
+            border: 2px solid transparent;
+        }
+
+        .turn-btn.active-turn {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .turn-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .white-dot { background: #f0f0f0; border: 1px solid #999; }
+        .black-dot { background: #222; border: 1px solid #666; }
+
+        /* Modal colocar pieza */
+        #place-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #place-modal-box {
+            background: var(--bg-dark);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 24px 28px;
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+
+        #place-modal-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        #place-modal-piece-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        #place-modal-img {
+            width: 52px;
+            height: 52px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        #place-modal-name {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        #place-modal-hint {
+            font-size: 0.78rem;
+            color: #aaa;
+            text-align: center;
+        }
+
+        #place-modal-input {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            padding: 10px;
+            border-radius: 8px;
+            text-transform: lowercase;
+        }
+
+        #place-modal-error {
+            font-size: 0.78rem;
+            color: #e17055;
+            text-align: center;
+            min-height: 16px;
+        }
+
+        #place-modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        #place-modal-cancel  { flex: 1; background: #636e72; }
+        #place-modal-confirm { flex: 1; background: var(--accent); }
+
+        @media (max-width: 800px) {
+            .container {
+                flex-direction: column;
+            }
+            .right-col {
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><i class="fas fa-chess-knight"></i> Asistente de Ajedrez Pro</h1>
+</header>
+
+<div id="loading-overlay">
+    <div class="spinner" style="width: 50px; height: 50px;"></div>
+    <p id="loading-text">Analizando posición...</p>
+</div>
+
+<div class="container">
+    <!-- Left Column: Board & Controls -->
+    <div class="left-col">
+        <!-- Inputs ocultos necesarios para el JS -->
+        <input type="password" id="openai-key" style="display:none">
+        <input type="text" id="fen-input" value="start" style="display:none">
+
+        <div class="card">
+            <div class="board-toolbar">
+                <button id="btn-edit" title="Activar modo editor"><i class="fas fa-pen-to-square"></i> Editar Posición</button>
+                <button id="btn-clear" title="Limpiar tablero" style="display:none"><i class="fas fa-trash-can"></i> Limpiar todo</button>
+                <button id="btn-reset" title="Posición inicial" style="display:none"><i class="fas fa-rotate-left"></i> Inicial</button>
+            </div>
+            <div id="edit-hint" style="display:none">
+                <i class="fas fa-circle-info"></i> <b>Colocar:</b> click en paleta → escribe casilla &nbsp;·&nbsp; <b>Eliminar:</b> arrastra pieza fuera del tablero &nbsp;·&nbsp; <b>Mover:</b> arrastra entre casillas
+            </div>
+            <div id="turn-selector" style="display:none">
+                <span class="turn-label">Turno:</span>
+                <button id="btn-turn-w" class="turn-btn active-turn">
+                    <span class="turn-dot white-dot"></span> Blancas
+                </button>
+                <button id="btn-turn-b" class="turn-btn">
+                    <span class="turn-dot black-dot"></span> Negras
+                </button>
+            </div>
+            <div id="myBoard"></div>
+            <div id="piece-palette" style="display:none">
+                <div class="palette-label">Blancas</div>
+                <div class="palette-row" id="palette-white">
+                    <img class="palette-piece" data-piece="wK" src="https://chessboardjs.com/img/chesspieces/wikipedia/wK.png" title="Rey blanco">
+                    <img class="palette-piece" data-piece="wQ" src="https://chessboardjs.com/img/chesspieces/wikipedia/wQ.png" title="Reina blanca">
+                    <img class="palette-piece" data-piece="wR" src="https://chessboardjs.com/img/chesspieces/wikipedia/wR.png" title="Torre blanca">
+                    <img class="palette-piece" data-piece="wB" src="https://chessboardjs.com/img/chesspieces/wikipedia/wB.png" title="Alfil blanco">
+                    <img class="palette-piece" data-piece="wN" src="https://chessboardjs.com/img/chesspieces/wikipedia/wN.png" title="Caballo blanco">
+                    <img class="palette-piece" data-piece="wP" src="https://chessboardjs.com/img/chesspieces/wikipedia/wP.png" title="Peón blanco">
+                </div>
+                <div class="palette-label">Negras</div>
+                <div class="palette-row" id="palette-black">
+                    <img class="palette-piece" data-piece="bK" src="https://chessboardjs.com/img/chesspieces/wikipedia/bK.png" title="Rey negro">
+                    <img class="palette-piece" data-piece="bQ" src="https://chessboardjs.com/img/chesspieces/wikipedia/bQ.png" title="Reina negra">
+                    <img class="palette-piece" data-piece="bR" src="https://chessboardjs.com/img/chesspieces/wikipedia/bR.png" title="Torre negra">
+                    <img class="palette-piece" data-piece="bB" src="https://chessboardjs.com/img/chesspieces/wikipedia/bB.png" title="Alfil negro">
+                    <img class="palette-piece" data-piece="bN" src="https://chessboardjs.com/img/chesspieces/wikipedia/bN.png" title="Caballo negro">
+                    <img class="palette-piece" data-piece="bP" src="https://chessboardjs.com/img/chesspieces/wikipedia/bP.png" title="Peón negro">
+                </div>
+            </div>
+        </div>
+
+        <div id="accuracy-panel" class="card" style="display:none">
+            <div class="panel-title"><i class="fas fa-chart-bar"></i> Precisión de jugadas</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">⬜ Blancas</div>
+                    <div class="stat-value" id="acc-white-pct">—</div>
+                    <div class="acc-detail" id="acc-white-detail"></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">⬛ Negras</div>
+                    <div class="stat-value" id="acc-black-pct">—</div>
+                    <div class="acc-detail" id="acc-black-detail"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Chat -->
+    <div class="right-col">
+        <div class="chat-header">
+            <i class="fas fa-robot"></i>
+            <strong>Entrenador Experto</strong>
+        </div>
+        <div id="chat-messages">
+            <div class="message ai">
+                ¡Hola! Soy tu entrenador con Gemini AI. Configura tu API Key de Gemini, coloca una posición y pulsa "Analizar" para empezar.
+            </div>
+        </div>
+        <div class="chat-toolbar">
+            <label for="image-input" class="btn-icon" title="Subir imagen"><i class="fas fa-image"></i></label>
+            <input type="file" id="image-input" accept="image/*" style="display:none">
+            <button id="btn-analyze"><i class="fas fa-microchip"></i> Analizar Posición</button>
+        </div>
+        <div class="chat-input-area">
+            <textarea id="chat-input" placeholder="Pregunta sobre la posición..."></textarea>
+            <button id="btn-send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: colocar pieza -->
+<div id="place-modal" style="display:none">
+    <div id="place-modal-box">
+        <div id="place-modal-title">¿En qué casilla?</div>
+        <div id="place-modal-piece-row">
+            <img id="place-modal-img" src="" alt="">
+            <span id="place-modal-name"></span>
+        </div>
+        <div id="place-modal-hint">Escribe la casilla (ej: e4, a1, h8)</div>
+        <input id="place-modal-input" type="text" maxlength="2" placeholder="e4" autocomplete="off">
+        <div id="place-modal-error"></div>
+        <div id="place-modal-buttons">
+            <button id="place-modal-cancel">Cancelar</button>
+            <button id="place-modal-confirm">Colocar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let board = null;
+    let game = new Chess();
+    let currentAnalysis = null;
+    let chatHistory = [];
+    let currentImageBase64 = null;
+    let editMode = false;
+    let editTurn = 'w';
+    let paletteDrag = null;
+    let pendingPiece = null;
+    let preMoveScore = null;
+    let moveStats = { w: { moves: 0, totalLoss: 0 }, b: { moves: 0, totalLoss: 0 } };
+
+    const PIECE_NAMES = {
+        wK:'Rey blanco', wQ:'Reina blanca', wR:'Torre blanca',
+        wB:'Alfil blanco', wN:'Caballo blanco', wP:'Peón blanco',
+        bK:'Rey negro',  bQ:'Reina negra',  bR:'Torre negra',
+        bB:'Alfil negro', bN:'Caballo negro', bP:'Peón negro'
+    };
+
+    function openPlaceModal(piece) {
+        pendingPiece = piece;
+        $('#place-modal-img').attr('src', `https://chessboardjs.com/img/chesspieces/wikipedia/${piece}.png`);
+        $('#place-modal-name').text(PIECE_NAMES[piece] || piece);
+        $('#place-modal-input').val('');
+        $('#place-modal-error').text('');
+        $('#place-modal').show();
+        setTimeout(() => $('#place-modal-input').focus(), 50);
+    }
+
+    function closePlaceModal() {
+        $('#place-modal').hide();
+        pendingPiece = null;
+    }
+
+    function confirmPlace() {
+        const square = $('#place-modal-input').val().trim().toLowerCase();
+        if (!/^[a-h][1-8]$/.test(square)) {
+            $('#place-modal-error').text('Casilla inválida. Usa formato como e4 o a1.');
+            return;
+        }
+        const pos = board.position();
+        pos[square] = pendingPiece;
+        board.position(pos, false);
+        updateFenFromBoard();
+        closePlaceModal();
+    }
+
+    // Convierte posición del tablero {a1:'wR',...} a FEN completo
+    function boardPositionToFen(pos) {
+        const ranks = ['8','7','6','5','4','3','2','1'];
+        const files = ['a','b','c','d','e','f','g','h'];
+        let placement = '';
+        for (const rank of ranks) {
+            let empty = 0;
+            for (const file of files) {
+                const piece = pos[file + rank];
+                if (piece) {
+                    if (empty > 0) { placement += empty; empty = 0; }
+                    // chessboard.js usa 'wK','bq', etc.
+                    placement += piece[0] === 'w' ? piece[1].toUpperCase() : piece[1].toLowerCase();
+                } else {
+                    empty++;
+                }
+            }
+            if (empty > 0) placement += empty;
+            if (rank !== '1') placement += '/';
+        }
+        return `${placement} ${editTurn} - - 0 1`;
+    }
+
+    function updateFenFromBoard() {
+        const fen = boardPositionToFen(board.position());
+        $('#fen-input').val(fen);
+        game.load(fen);
+    }
+
+    function toggleEditMode() {
+        editMode = !editMode;
+        if (editMode) {
+            $('#btn-edit').addClass('active').html('<i class="fas fa-check"></i> Finalizar Edición');
+            $('#btn-clear, #btn-reset').show();
+            $('#edit-hint').show();
+            $('#turn-selector').show();
+            $('#piece-palette').show();
+            $('#myBoard').addClass('edit-mode');
+        } else {
+            $('#btn-edit').removeClass('active').html('<i class="fas fa-pen-to-square"></i> Editar Posición');
+            $('#btn-clear, #btn-reset').hide();
+            $('#edit-hint').hide();
+            $('#turn-selector').hide();
+            $('#piece-palette').hide();
+            $('#myBoard').removeClass('edit-mode');
+            updateFenFromBoard();
+        }
+    }
+
+    // Encuentra casilla del tablero en las coordenadas dadas
+    function getSquareFromPoint(x, y) {
+        const el = document.elementFromPoint(x, y);
+        if (!el) return null;
+        let node = el;
+        while (node) {
+            if (/^[a-h][1-8]$/.test(node.id)) return node.id;
+            if (node.id === 'myBoard') break;
+            node = node.parentElement;
+        }
+        return null;
+    }
+
+    function getMoveQuality(cpLoss) {
+        if (cpLoss === 0)   return { label: '★', color: '#00b894' };  // Mejor
+        if (cpLoss <= 10)   return { label: '!',  color: '#55efc4' };  // Excelente
+        if (cpLoss <= 30)   return null;                                // Buena (sin badge)
+        if (cpLoss <= 100)  return { label: '?!', color: '#fdcb6e' };  // Imprecisión
+        if (cpLoss <= 200)  return { label: '?',  color: '#e17055' };  // Error
+        return                     { label: '??', color: '#d63031' };  // Blunder
+    }
+
+    function showMoveBadge(square, cpLoss) {
+        $('.move-badge').remove();
+        const q = getMoveQuality(cpLoss);
+        if (!q) return;
+        $(`.square-${square}`).append(
+            `<span class="move-badge" style="background:${q.color}">${q.label}</span>`
+        );
+    }
+
+    function resetStats() {
+        preMoveScore = null;
+        moveStats = { w: { moves: 0, totalLoss: 0 }, b: { moves: 0, totalLoss: 0 } };
+        $('.move-badge').remove();
+        $('#accuracy-panel').hide();
+    }
+
+    async function silentAnalyze(fen) {
+        try {
+            const r = await fetch('http://localhost:5000/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fen })
+            });
+            const d = await r.json();
+            return d.errors ? null : d.score_cp;
+        } catch { return null; }
+    }
+
+    function calcAccuracy(avgCpLoss) {
+        return Math.max(0, Math.min(100, 103.1668 * Math.exp(-0.04354 * avgCpLoss) - 3.1669));
+    }
+
+    function accuracyColor(pct) {
+        if (pct >= 90) return '#00b894';
+        if (pct >= 75) return '#fdcb6e';
+        return '#e17055';
+    }
+
+    function updateAccuracyPanel() {
+        ['w', 'b'].forEach(side => {
+            const s = moveStats[side];
+            if (s.moves === 0) return;
+            const avg = s.totalLoss / s.moves;
+            const pct = calcAccuracy(avg);
+            const id = side === 'w' ? 'white' : 'black';
+            $(`#acc-${id}-pct`).text(pct.toFixed(1) + '%').css('color', accuracyColor(pct));
+            $(`#acc-${id}-detail`).text(`${s.moves} jug. · ${avg.toFixed(0)} cp promedio`);
+        });
+        $('#accuracy-panel').show();
+    }
+
+    async function recordMove(turn, fen, toSquare) {
+        $('.move-badge').remove();
+        const scoreAfter = await silentAnalyze(fen);
+        if (scoreAfter !== null && preMoveScore !== null) {
+            const loss = turn === 'w'
+                ? Math.max(0, preMoveScore - scoreAfter)
+                : Math.max(0, scoreAfter - preMoveScore);
+            moveStats[turn].moves++;
+            moveStats[turn].totalLoss += loss;
+            updateAccuracyPanel();
+            showMoveBadge(toSquare, loss);
+        }
+        if (scoreAfter !== null) preMoveScore = scoreAfter;
+    }
+
+    // Initialize board
+    function initBoard() {
+        board = Chessboard('myBoard', {
+            draggable: true,
+            dropOffBoard: 'trash',
+            position: 'start',
+            onDrop: onDrop,
+            onSnapEnd: onSnapEnd,
+            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+        });
+        updateFenInput();
+    }
+
+    function onDrop(source, target) {
+        if (editMode) {
+            if (target === 'offboard') {
+                updateFenFromBoard();
+                return;
+            }
+            if (source === target) return 'snapback';
+            return;
+        }
+        if (target === 'offboard') return 'snapback';
+        const movingTurn = game.turn();
+        const move = game.move({ from: source, to: target, promotion: 'q' });
+        if (move === null) return 'snapback';
+        updateFenInput();
+        clearHighlights();
+        recordMove(movingTurn, game.fen(), move.to);
+    }
+
+    function onSnapEnd() {
+        if (editMode) {
+            updateFenFromBoard();
+            return;
+        }
+        board.position(game.fen());
+    }
+
+    function updateFenInput() {
+        $('#fen-input').val(game.fen());
+    }
+
+    // UI Helpers
+    function showLoading(text) {
+        $('#loading-text').text(text);
+        $('#loading-overlay').css('display', 'flex');
+    }
+
+    function hideLoading() {
+        $('#loading-overlay').hide();
+    }
+
+    function addMessage(role, text) {
+        const msgDiv = $('<div class="message"></div>').addClass(role).text(text);
+        $('#chat-messages').append(msgDiv);
+        $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+        chatHistory.push({ role: role === 'user' ? 'user' : 'model', content: text });
+    }
+
+    function clearHighlights() {
+        $('#myBoard .square-55d63').removeClass('highlight-best');
+    }
+
+    function highlightMove(move) {
+        if (!move || move === '(none)' || !/^[a-h][1-8][a-h][1-8]/.test(move)) return;
+        clearHighlights();
+        const from = move.substring(0, 2);
+        const to = move.substring(2, 4);
+        $(`.square-${from}`).addClass('highlight-best');
+        $(`.square-${to}`).addClass('highlight-best');
+    }
+
+    // API Calls
+    async function analyzePosition() {
+        const fen = $('#fen-input').val();
+        showLoading("Stockfish está pensando...");
+        
+        try {
+            const response = await fetch('http://localhost:5000/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fen: fen })
+            });
+            
+            const data = await response.json();
+            if (data.errors) throw new Error(data.errors);
+            
+            currentAnalysis = data;
+            preMoveScore = data.score_cp;
+
+            const noMove = !data.bestmove || data.bestmove === '(none)';
+            const scoreVal = data.score_cp / 100;
+            let scoreText, scoreColor, bestmoveText;
+
+            if (noMove) {
+                bestmoveText = '—';
+                scoreText = Math.abs(data.score_cp) >= 9000 ? '¡Jaque mate!' : 'Tablas';
+                scoreColor = '#e17055';
+            } else {
+                bestmoveText = data.bestmove;
+                scoreText = scoreVal > 0 ? `+${scoreVal.toFixed(2)} Blancas` :
+                            scoreVal < 0 ? `${scoreVal.toFixed(2)} Negras` : `0.00 Igualdad`;
+                scoreColor = scoreVal > 0 ? '#f0f0f0' : scoreVal < 0 ? '#a0c4ff' : '#aaa';
+            }
+
+            const card = `
+                <div class="message stockfish-card">
+                    <div class="stats-title"><i class="fas fa-microchip"></i> Stockfish 18</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label"><i class="fas fa-chess-knight"></i> Mejor jugada</div>
+                            <div class="stat-value">${bestmoveText}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label"><i class="fas fa-balance-scale"></i> Evaluación</div>
+                            <div class="stat-value" style="color:${scoreColor}">${scoreText}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label"><i class="fas fa-layer-group"></i> Profundidad</div>
+                            <div class="stat-value">${data.depth}</div>
+                        </div>
+                    </div>
+                    <div class="stat-pv">
+                        <span class="stat-label"><i class="fas fa-route"></i> Línea principal:</span>
+                        <span class="pv-text">${noMove ? '—' : data.pv}</span>
+                    </div>
+                    <div class="stat-fen">
+                        <span class="stat-label"><i class="fas fa-code"></i> FEN:</span>
+                        <span class="pv-text" style="word-break:break-all;font-size:0.78em">${fen}</span>
+                    </div>
+                </div>`;
+
+            $('#chat-messages').append(card);
+            $('#chat-messages').scrollTop($('#chat-messages')[0].scrollHeight);
+
+            highlightMove(data.bestmove);
+
+        } catch (err) {
+            alert("Error: " + err.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function callGemini(userText) {
+        const fen = $('#fen-input').val();
+        const apiKey = localStorage.getItem('gemini_api_key');
+
+        if (!apiKey) {
+            const key = prompt("Ingresa tu API Key de Gemini:");
+            if (!key) return;
+            localStorage.setItem('gemini_api_key', key);
+            $('#openai-key').val(key);
+            return callGemini(userText);
+        }
+
+        if (userText) addMessage('user', userText);
+        showLoading("Gemini está analizando...");
+
+        try {
+            const payload = {
+                fen: fen,
+                analysis: currentAnalysis,
+                messages: chatHistory,
+                api_key: apiKey
+            };
+
+            const response = await fetch('http://localhost:5000/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+            if (data.errors) throw new Error(data.errors);
+
+            addMessage('ai', data.response);
+            currentImageBase64 = null; // Clear image after sending
+            $('#image-input').val('');
+            
+        } catch (err) {
+            addMessage('ai', "Error: " + err.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function detectPositionFromImage(imageBase64) {
+        const apiKey = localStorage.getItem('gemini_api_key');
+        if (!apiKey) return;
+
+        showLoading("Detectando posición del tablero...");
+        try {
+            const response = await fetch('http://localhost:5000/image-to-fen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_base64: imageBase64, api_key: apiKey })
+            });
+            const data = await response.json();
+            if (data.errors) throw new Error(data.errors);
+
+            if (game.load(data.fen)) {
+                board.position(data.fen);
+                $('#fen-input').val(data.fen);
+                clearHighlights();
+                addMessage('ai', `Posición detectada y cargada en el tablero.`);
+            } else {
+                throw new Error("El FEN detectado no es válido para el tablero.");
+            }
+        } catch (err) {
+            addMessage('ai', `No se pudo detectar la posición: ${err.message}`);
+        } finally {
+            // La imagen ya fue procesada para el tablero — no mandarla al chat
+            currentImageBase64 = null;
+            $('#image-input').val('');
+            hideLoading();
+        }
+    }
+
+    // Events
+    $(document).ready(() => {
+        initBoard();
+
+        // Load API Key
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) $('#openai-key').val(savedKey);
+
+        $('#fen-input').on('change', function() {
+            const fen = $(this).val();
+            if (game.load(fen)) {
+                board.position(fen);
+                clearHighlights();
+            } else if (fen === 'start') {
+                game.reset();
+                board.start();
+                clearHighlights();
+            } else {
+                alert("FEN inválido");
+            }
+        });
+
+        $('#btn-edit').click(() => toggleEditMode());
+
+        $('#btn-turn-w').click(function() {
+            editTurn = 'w';
+            $('#btn-turn-w').addClass('active-turn');
+            $('#btn-turn-b').removeClass('active-turn');
+        });
+
+        $('#btn-turn-b').click(function() {
+            editTurn = 'b';
+            $('#btn-turn-b').addClass('active-turn');
+            $('#btn-turn-w').removeClass('active-turn');
+        });
+
+        // Click en paleta → abrir modal
+        $(document).on('click', '.palette-piece', function() {
+            if (!editMode) return;
+            openPlaceModal($(this).data('piece'));
+        });
+
+        // Modal: confirmar, cancelar, Enter
+        $('#place-modal-confirm').click(confirmPlace);
+        $('#place-modal-cancel').click(closePlaceModal);
+        $('#place-modal').click(function(e) {
+            if (e.target === this) closePlaceModal();
+        });
+        $('#place-modal-input').on('keydown', function(e) {
+            if (e.key === 'Enter') confirmPlace();
+            if (e.key === 'Escape') closePlaceModal();
+        });
+
+        $('#btn-clear').click(() => {
+            board.position({}, false);
+            updateFenFromBoard();
+        });
+
+        $('#btn-reset').click(() => {
+            game.reset();
+            board.position('start', false);
+            updateFenFromBoard();
+        });
+
+        $('#btn-analyze').click(() => analyzePosition());
+
+        $('#btn-send').click(() => {
+            const text = $('#chat-input').val();
+            if (!text && !currentImageBase64) return;
+            $('#chat-input').val('');
+            callGemini(text);
+        });
+
+        $('#image-input').on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                currentImageBase64 = event.target.result;
+                await detectPositionFromImage(currentImageBase64);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Allow Enter in chat
+        $('#chat-input').on('keypress', function(e) {
+            if (e.which === 13 && !e.shiftKey) {
+                e.preventDefault();
+                $('#btn-send').click();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

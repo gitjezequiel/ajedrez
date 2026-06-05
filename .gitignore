@@ -1,0 +1,24 @@
+# API keys y configuración sensible
+.env
+.env.*
+*.key
+secrets.py
+
+# Binario de Stockfish (>100MB, supera límite de GitHub)
+*.exe
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Sistema
+.DS_Store
+Thumbs.db
