@@ -83,6 +83,10 @@
             box-shadow: inset 0 0 3px 3px yellow;
         }
 
+        .highlight-selected {
+            box-shadow: inset 0 0 4px 4px #00bfff;
+        }
+
         .move-badge {
             position: absolute;
             top: 2px;
@@ -862,6 +866,129 @@
             font-size: 0.82rem; color: #ccc; line-height: 1.6;
             display: none;
         }
+        /* ── Tarjetas de notas en el panel ── */
+        #pgn-notes-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+        .pgn-note-card-item {
+            padding: 8px 28px 8px 11px;
+            border-radius: 6px; font-size: 0.79rem;
+            position: relative; cursor: pointer;
+            transition: filter 0.12s;
+            border: 1px solid; border-left-width: 3px;
+        }
+        .pgn-note-card-item:hover { filter: brightness(1.25); }
+        .pgn-note-card-item-title { font-weight: 600; }
+        .pgn-note-card-del {
+            position: absolute; top: 5px; right: 6px;
+            background: none; border: none; cursor: pointer;
+            font-size: 11px; padding: 2px 4px; line-height: 1;
+            opacity: 0.4; color: inherit;
+        }
+        .pgn-note-card-del:hover { opacity: 1; }
+        #pgn-add-note-btn {
+            margin-top: 8px; width: 100%; text-align: left;
+            background: transparent; border: 1px dashed #252545;
+            color: #3d3d60; border-radius: 6px;
+            padding: 6px 12px; font-size: 11px; cursor: pointer;
+            transition: all 0.15s; font-family: inherit;
+        }
+        #pgn-add-note-btn:hover { border-color: #d4a800; color: #d4a800; }
+        #pgn-notes-status { font-size: 11px; color: #555; margin-top: 4px; min-height: 14px; }
+        /* ── Color picker ── */
+        #note-color-picker {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 18px; border-bottom: 1px solid #1a1a34;
+        }
+        #note-color-picker label { font-size: 10px; color: #444; margin-right: 2px; white-space: nowrap; }
+        .color-sw {
+            width: 18px; height: 18px; border-radius: 50%; cursor: pointer;
+            border: 2px solid transparent; transition: transform 0.12s, border-color 0.12s;
+            flex-shrink: 0;
+        }
+        .color-sw:hover { transform: scale(1.15); }
+        .color-sw.sel { border-color: #fff; transform: scale(1.2); }
+        /* ── Modal de nota ── */
+        #note-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.78); z-index: 9000;
+            align-items: center; justify-content: center;
+        }
+        #note-modal.open { display: flex; }
+        #note-modal-box {
+            background: #141428; border-radius: 12px;
+            width: 540px; max-width: 95vw; max-height: 88vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+            border: 1px solid rgba(212,168,0,0.15);
+        }
+        #note-modal-header {
+            padding: 15px 18px;
+            background: linear-gradient(135deg, rgba(212,168,0,0.12), rgba(212,168,0,0.04));
+            border-bottom: 1px solid rgba(212,168,0,0.12);
+            display: flex; align-items: center; gap: 9px;
+        }
+        #note-modal-header i { color: #d4a800; font-size: 0.95rem; }
+        #note-modal-header-title { color: #d4a800; font-weight: 700; font-size: 0.88rem; flex: 1; }
+        #note-modal-x {
+            background: none; border: none; color: #444;
+            cursor: pointer; font-size: 18px; line-height: 1; padding: 0 2px;
+        }
+        #note-modal-x:hover { color: #ccc; }
+        #note-modal-title-input {
+            background: transparent; border: none;
+            border-bottom: 1px solid #1e1e3a;
+            color: #ddd; font-size: 0.92rem; font-weight: 600;
+            padding: 13px 18px 11px; outline: none;
+            font-family: inherit; width: 100%; box-sizing: border-box;
+        }
+        #note-modal-title-input:focus { border-bottom-color: #d4a800; }
+        #note-modal-title-input::placeholder { color: #2e2e50; }
+        /* Toolbar */
+        #note-editor-toolbar {
+            display: flex; align-items: center; gap: 1px;
+            padding: 5px 12px; border-bottom: 1px solid #1a1a34;
+            flex-wrap: wrap; background: #121226;
+        }
+        .tb { background: none; border: none; color: #555; cursor: pointer;
+               padding: 5px 7px; border-radius: 5px; font-size: 12px;
+               line-height: 1; transition: all 0.1s; }
+        .tb:hover { background: rgba(255,255,255,0.06); color: #bbb; }
+        .tb.on { background: rgba(212,168,0,0.15); color: #d4a800; }
+        .tb-sep { width: 1px; height: 16px; background: #252545; margin: 0 4px; flex-shrink: 0; }
+        /* Editor */
+        #note-editor {
+            flex: 1; overflow-y: auto; padding: 14px 18px;
+            outline: none; font-size: 0.84rem; color: #ccc;
+            line-height: 1.85; min-height: 140px; max-height: 320px;
+            background: #141428;
+        }
+        #note-editor:empty::before {
+            content: attr(data-ph); color: #2a2a48; pointer-events: none;
+            display: block;
+        }
+        #note-editor ul, #note-editor ol { padding-left: 22px; margin: 4px 0; }
+        #note-editor li { margin: 3px 0; }
+        #note-editor h3 { color: #d4a800; font-size: 0.88rem; margin: 10px 0 4px; }
+        #note-editor b, #note-editor strong { color: #e8e8e8; }
+        #note-editor mark { background: rgba(212,168,0,0.22); color: #d4c060;
+                            padding: 1px 4px; border-radius: 3px; }
+        /* Footer */
+        #note-modal-footer {
+            padding: 11px 18px; display: flex;
+            justify-content: flex-end; gap: 8px;
+            border-top: 1px solid #1a1a34; background: #121226;
+        }
+        #note-modal-cancel-btn {
+            background: transparent; color: #555; border: 1px solid #252545;
+            padding: 7px 18px; border-radius: 7px; cursor: pointer; font-size: 0.8rem;
+        }
+        #note-modal-cancel-btn:hover { color: #999; border-color: #444; }
+        #note-modal-save-btn {
+            background: rgba(212,168,0,0.14); color: #d4a800;
+            border: 1px solid rgba(212,168,0,0.3);
+            padding: 7px 20px; border-radius: 7px; cursor: pointer;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        #note-modal-save-btn:hover { background: rgba(212,168,0,0.25); }
     </style>
 </head>
 <body>
@@ -871,6 +998,8 @@
     <nav class="tab-bar">
         <button class="tab-btn active" data-tab="analysis"><i class="fas fa-microchip"></i> Análisis</button>
         <button class="tab-btn" data-tab="exercises"><i class="fas fa-book-open"></i> Ejercicios</button>
+        <button class="tab-btn" data-tab="books"><i class="fas fa-book"></i> Libros</button>
+        <button class="tab-btn" data-tab="courses"><i class="fas fa-graduation-cap"></i> Cursos</button>
     </nav>
     <button id="btn-new-game"><i class="fas fa-plus"></i> Nueva Partida</button>
 </header>
@@ -1044,8 +1173,99 @@
                     <div id="pgn-game-title"></div>
                     <div id="pgn-moves-list"></div>
                     <div id="pgn-comment"></div>
+                    <div id="pgn-notes-list"></div>
+                    <button id="pgn-add-note-btn"><i class="fas fa-plus" style="margin-right:5px;font-size:10px;"></i>Agregar nota</button>
+                    <div id="pgn-notes-status"></div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== COURSES SECTION ===== -->
+<div id="section-courses" style="display:none">
+    <div class="container">
+        <!-- Left: tablero (para lecciones PGN) -->
+        <div class="left-col">
+            <div class="card" style="display:flex;flex-direction:column;gap:12px;">
+                <div id="courses-board-wrap" style="display:none">
+                    <div id="courses-board" style="max-width:500px;margin:0 auto;"></div>
+                    <div class="pgn-nav-bar" id="courses-nav-bar">
+                        <button id="courses-first">⏮</button>
+                        <button id="courses-prev">◀</button>
+                        <button id="courses-next">▶</button>
+                        <button id="courses-last">⏭</button>
+                    </div>
+                    <div id="courses-board-status" style="text-align:center;font-size:0.8rem;color:#aaa;padding:4px 0;"></div>
+                </div>
+                <div id="courses-lesson-content" style="padding:8px;flex:1;overflow-y:auto;"></div>
+            </div>
+        </div>
+
+        <!-- Right: navegación cursos → secciones → lecciones -->
+        <div class="right-col-ex">
+            <div class="ex-header">
+                <i class="fas fa-graduation-cap"></i>
+                <strong id="courses-header-title">Cursos</strong>
+                <button id="btn-courses-back" style="display:none;margin-left:auto;background:var(--bg-darker);padding:4px 10px;font-size:0.78rem;border-radius:6px;">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+
+            <!-- Lista de cursos -->
+            <div id="courses-list-panel" style="flex:1;overflow-y:auto;padding:16px;">
+                <div class="chapters-label" style="margin-bottom:12px;">Selecciona un curso</div>
+                <div id="courses-list"><div style="color:#aaa;text-align:center;margin-top:30px;">Cargando cursos…</div></div>
+            </div>
+
+            <!-- Detalle: secciones + lecciones -->
+            <div id="courses-detail-panel" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+                <div id="courses-sections-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: nota -->
+<div id="note-modal">
+    <div id="note-modal-box">
+        <div id="note-modal-header">
+            <i class="fas fa-sticky-note"></i>
+            <span id="note-modal-header-title">Nota</span>
+            <button id="note-modal-x" title="Cerrar">✕</button>
+        </div>
+        <input type="text" id="note-modal-title-input" placeholder="Nombre de la nota…" maxlength="120" autocomplete="off" spellcheck="false">
+        <div id="note-color-picker">
+            <label>Color:</label>
+            <span class="color-sw sel" data-color="#d4a800" style="background:#d4a800"  title="Ámbar"></span>
+            <span class="color-sw"     data-color="#00b894" style="background:#00b894"  title="Verde"></span>
+            <span class="color-sw"     data-color="#0984e3" style="background:#0984e3"  title="Azul"></span>
+            <span class="color-sw"     data-color="#e17055" style="background:#e17055"  title="Rojo"></span>
+            <span class="color-sw"     data-color="#6c5ce7" style="background:#6c5ce7"  title="Morado"></span>
+            <span class="color-sw"     data-color="#00cec9" style="background:#00cec9"  title="Cian"></span>
+            <span class="color-sw"     data-color="#fd79a8" style="background:#fd79a8"  title="Rosa"></span>
+            <span class="color-sw"     data-color="#636e72" style="background:#636e72"  title="Gris"></span>
+        </div>
+        <div id="note-editor-toolbar">
+            <button class="tb" data-cmd="bold"          title="Negrita (Ctrl+B)"><i class="fas fa-bold"></i></button>
+            <button class="tb" data-cmd="italic"        title="Cursiva (Ctrl+I)"><i class="fas fa-italic"></i></button>
+            <button class="tb" data-cmd="underline"     title="Subrayar (Ctrl+U)"><i class="fas fa-underline"></i></button>
+            <button class="tb" data-cmd="strikeThrough" title="Tachado"><i class="fas fa-strikethrough"></i></button>
+            <span class="tb-sep"></span>
+            <button class="tb" data-cmd="insertUnorderedList" title="Lista con viñetas"><i class="fas fa-list-ul"></i></button>
+            <button class="tb" data-cmd="insertOrderedList"   title="Lista numerada"><i class="fas fa-list-ol"></i></button>
+            <span class="tb-sep"></span>
+            <button class="tb" id="tb-heading"    title="Título de sección"><i class="fas fa-heading"></i></button>
+            <button class="tb" id="tb-highlight"  title="Resaltar texto"><i class="fas fa-highlighter"></i></button>
+            <button class="tb" id="tb-indent"     title="Sangría"><i class="fas fa-indent"></i></button>
+            <button class="tb" id="tb-outdent"    title="Quitar sangría"><i class="fas fa-outdent"></i></button>
+            <span class="tb-sep"></span>
+            <button class="tb" data-cmd="removeFormat" title="Quitar formato"><i class="fas fa-remove-format"></i></button>
+        </div>
+        <div id="note-editor" contenteditable="true" data-ph="Escribe tu nota aquí… usa la barra para dar formato, listas o resaltar ideas clave"></div>
+        <div id="note-modal-footer">
+            <button id="note-modal-cancel-btn">Cancelar</button>
+            <button id="note-modal-save-btn"><i class="fas fa-save" style="margin-right:6px;"></i>Guardar nota</button>
         </div>
     </div>
 </div>
@@ -1082,6 +1302,7 @@
     let moveStats = { w: { moves: 0, totalLoss: 0 }, b: { moves: 0, totalLoss: 0 } };
     let undoStack = [];
     let gameLog = [];
+    let selectedSquare = null;
 
     const PIECE_NAMES = {
         wK:'Rey blanco', wQ:'Reina blanca', wR:'Torre blanca',
@@ -1247,6 +1468,7 @@
         game.reset();
         board.position('start', false);
         updateFenInput();
+        clearSelection();
         clearHighlights();
         resetStats();
         currentAnalysis = null;
@@ -1283,6 +1505,7 @@
         game.undo();
         board.position(game.fen(), false);
         updateFenInput();
+        clearSelection();
         clearHighlights();
         $('.move-badge').remove();
 
@@ -1386,6 +1609,7 @@
             position: 'start',
             onDrop: onDrop,
             onSnapEnd: onSnapEnd,
+            onSquareClick: onSquareClick,
             pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
         });
         updateFenInput();
@@ -1417,6 +1641,82 @@
             return;
         }
         board.position(game.fen());
+    }
+
+    function clearSelection() {
+        selectedSquare = null;
+        $('#myBoard .square-55d63').removeClass('highlight-selected');
+    }
+
+    function squareFromPoint(clientX, clientY, boardId) {
+        let found = null;
+        $(`#${boardId} .square-55d63`).each(function() {
+            const r = this.getBoundingClientRect();
+            if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+                const cls = $(this).attr('class').split(' ').find(c => /^square-[a-h][1-8]$/.test(c));
+                if (cls) found = cls.slice(7);
+            }
+        });
+        return found;
+    }
+
+    function initTouchSupport(boardId, getPosition, clickHandler) {
+        let touchStartX = 0, touchStartY = 0;
+
+        document.getElementById(boardId).addEventListener('touchstart', function(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.getElementById(boardId).addEventListener('touchend', function(e) {
+            const t = e.changedTouches[0];
+            const dx = Math.abs(t.clientX - touchStartX);
+            const dy = Math.abs(t.clientY - touchStartY);
+            if (dx > 12 || dy > 12) return;
+            const square = squareFromPoint(t.clientX, t.clientY, boardId);
+            if (!square) return;
+            e.preventDefault();
+            const piece = getPosition()[square] || false;
+            clickHandler(square, piece);
+        }, { passive: false });
+    }
+
+    function onSquareClick(square, piece) {
+        if (editMode) return;
+
+        const currentTurn = game.turn();
+        const isOwnPiece = piece && piece[0].toLowerCase() === currentTurn;
+
+        if (selectedSquare === null) {
+            if (!isOwnPiece) return;
+            selectedSquare = square;
+            $(`.square-${square}`).addClass('highlight-selected');
+            return;
+        }
+
+        if (square === selectedSquare) {
+            clearSelection();
+            return;
+        }
+
+        if (isOwnPiece) {
+            clearSelection();
+            selectedSquare = square;
+            $(`.square-${square}`).addClass('highlight-selected');
+            return;
+        }
+
+        const movingTurn = game.turn();
+        const move = game.move({ from: selectedSquare, to: square, promotion: 'q' });
+        clearSelection();
+        if (move === null) return;
+
+        undoStack.push({ preMoveScore, statsW: { ...moveStats.w }, statsB: { ...moveStats.b } });
+        updateFenInput();
+        clearHighlights();
+        updateUndoButton();
+        board.position(game.fen());
+        recordMove(movingTurn, game.fen(), move.to);
     }
 
     function updateFenInput() {
@@ -1603,6 +1903,7 @@
     // Events
     $(document).ready(() => {
         initBoard();
+        initTouchSupport('myBoard', () => board.position(), onSquareClick);
 
         // Load API Key
         const savedKey = localStorage.getItem('gemini_api_key');
@@ -1666,959 +1967,14 @@
         $('#coach-panel').show();
 
         // ===== EXERCISES / PGN TRAINING =====
-        const CURSOS = [
-            {
-                id: 'programa-chess-enigma',
-                nombre: 'Programa Chess Enigma',
-                descripcion: 'Por Chess Enigma · Curso oficial para principiantes',
-                secciones: [
-                    {
-                        id: 'sec0',
-                        nombre: 'Módulo 0: Curso para principiantes',
-                        lecciones: [
-                            {
-                                id: 'sec0-lec1',
-                                titulo: '1. Aprende a jugar aperturas en ajedrez',
-                                subtitulo: '11 capítulos',
-                                sublecciones: [
-                                    { id: 'RnTHJsaZ', studyId: 'm9tybSLM', api: 'lichess', titulo: '1️⃣ LA APERTURA' },
-                                    { id: 'fWDquS0m', studyId: 'm9tybSLM', api: 'lichess', titulo: '#1 Domina el centro' },
-                                    { id: '83TOATII', studyId: 'm9tybSLM', api: 'lichess', titulo: '#2 Domina el centro' },
-                                    { id: '3uy5saP1', studyId: 'm9tybSLM', api: 'lichess', titulo: '#3 Desarrollo ideal' },
-                                    { id: '8BmgmwgQ', studyId: 'm9tybSLM', api: 'lichess', titulo: '#4 Desarrollo ideal' },
-                                    { id: 'oWKBwqen', studyId: 'm9tybSLM', api: 'lichess', titulo: '#5 Protege a tu rey' },
-                                    { id: 'ouJYkhsI', studyId: 'm9tybSLM', api: 'lichess', titulo: '#6 Protege a tu rey' },
-                                    { id: 'gSKqMgeA', studyId: 'm9tybSLM', api: 'lichess', titulo: '#7 Pérdidas de tiempo' },
-                                    { id: 'MguDaOiW', studyId: 'm9tybSLM', api: 'lichess', titulo: '#8 Pérdidas de tiempo' },
-                                    { id: 'WMYS2K1b', studyId: 'm9tybSLM', api: 'lichess', titulo: '#9 La iniciativa' },
-                                    { id: 'A8cLnzFH', studyId: 'm9tybSLM', api: 'lichess', titulo: '#10 La iniciativa' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec2',
-                                titulo: '2. Repertorio completo de aperturas para jugar contra todo',
-                                subtitulo: '14 capítulos',
-                                sublecciones: [
-                                    { id: 'QKFcyzD9', studyId: '1AaMi41d', api: 'lichess', titulo: 'Intro' },
-                                    { id: 'NGadKxt6', studyId: '1AaMi41d', api: 'lichess', titulo: '1️⃣ Sistema Colle Enigmático' },
-                                    { id: 'fFkPXzXc', studyId: '1AaMi41d', api: 'lichess', titulo: 'Sistema Colle · Variante principal' },
-                                    { id: 'xtwIbTeU', studyId: '1AaMi41d', api: 'lichess', titulo: 'Sistema Colle · c4' },
-                                    { id: 'pvMVOg4X', studyId: '1AaMi41d', api: 'lichess', titulo: 'Sistema Colle · cxd4' },
-                                    { id: 'PqwwC5h8', studyId: '1AaMi41d', api: 'lichess', titulo: 'Sistema Colle · b6' },
-                                    { id: '1YLti8IS', studyId: '1AaMi41d', api: 'lichess', titulo: '2️⃣ Defensa Holandesa Enigmática' },
-                                    { id: 'lCitwQ2a', studyId: '1AaMi41d', api: 'lichess', titulo: 'Holandesa · Variante principal' },
-                                    { id: '0nxsMbe7', studyId: '1AaMi41d', api: 'lichess', titulo: 'Holandesa · Axe4' },
-                                    { id: 'OxVI6Yhh', studyId: '1AaMi41d', api: 'lichess', titulo: 'Holandesa · Dc2' },
-                                    { id: '2zvR5wwt', studyId: '1AaMi41d', api: 'lichess', titulo: '3️⃣ Defensa Siciliana Enigmática' },
-                                    { id: 'MDzNbjHc', studyId: '1AaMi41d', api: 'lichess', titulo: 'Siciliana · Variante principal' },
-                                    { id: 'd6MzBf1m', studyId: '1AaMi41d', api: 'lichess', titulo: 'Siciliana · c4' },
-                                    { id: 'Igj8SaAe', studyId: '1AaMi41d', api: 'lichess', titulo: 'Siciliana · C1c3' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec3',
-                                titulo: '3. Has salido de la APERTURA, ¿y ahora qué? — 3 Estrategias',
-                                subtitulo: '10 capítulos',
-                                sublecciones: [
-                                    { id: 'WPGA1rdQ', studyId: 'lz46Xo86', api: 'lichess', titulo: '3️⃣ ESTRATEGIAS PARA GANAR' },
-                                    { id: 'wgMcr0H7', studyId: 'lz46Xo86', api: 'lichess', titulo: '#1 Mejora tus piezas' },
-                                    { id: 'UmJVVFAv', studyId: 'lz46Xo86', api: 'lichess', titulo: '#2 Mejora tus piezas' },
-                                    { id: 'TUy31rlt', studyId: 'lz46Xo86', api: 'lichess', titulo: '#3 Mejora tus piezas' },
-                                    { id: 'dWtKiSyx', studyId: 'lz46Xo86', api: 'lichess', titulo: '#4 Importancia estratégica de los peones' },
-                                    { id: 'azrBTkqj', studyId: 'lz46Xo86', api: 'lichess', titulo: '#5 Importancia estratégica de los peones' },
-                                    { id: '4lnwkGUx', studyId: 'lz46Xo86', api: 'lichess', titulo: '#6 Importancia estratégica de los peones' },
-                                    { id: 'vzQfcCKm', studyId: 'lz46Xo86', api: 'lichess', titulo: '#7 Ataca las debilidades del rival' },
-                                    { id: 'WwxYQg75', studyId: 'lz46Xo86', api: 'lichess', titulo: '#8 Ataca las debilidades del rival' },
-                                    { id: 'WQF5Ao96', studyId: 'lz46Xo86', api: 'lichess', titulo: '#9 Ataca las debilidades del rival' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec4',
-                                titulo: '4. 5 ERRORES de Principiantes — ¡Evítalos!',
-                                subtitulo: '11 capítulos',
-                                sublecciones: [
-                                    { id: 'mktAcFq9', studyId: 'iKPjwT4p', api: 'lichess', titulo: '5 ERRORES DE PRINCIPIANTES' },
-                                    { id: 'q8l4L2Qt', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Jugadas innecesarias de peón #1' },
-                                    { id: 'QOfaXrTv', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Jugadas innecesarias de peón #2' },
-                                    { id: '7J0aNxT9', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Desarrollar pronto la dama #3' },
-                                    { id: '9o2bGoJP', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Desarrollar pronto la dama #4' },
-                                    { id: '5B7CquyN', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Dejar piezas indefensas #5' },
-                                    { id: 'lcfVPyf8', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Dejar piezas indefensas #6' },
-                                    { id: 'py1hMWx6', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'El rey en el centro #7' },
-                                    { id: '6xDioE4X', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'El rey en el centro #8' },
-                                    { id: '5TXFGzRe', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Debilitar el enroque #9' },
-                                    { id: 'iX2iTEOv', studyId: 'iKPjwT4p', api: 'lichess', titulo: 'Debilitar el enroque #10' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec5',
-                                titulo: '5. ATACA como un AJEDRECISTA PROFESIONAL',
-                                subtitulo: '11 capítulos',
-                                sublecciones: [
-                                    { id: 'g3t39yd4', studyId: 'iPMA8QDZ', api: 'lichess', titulo: '5️⃣ ATACA como un AJEDRECISTA PROFESIONAL' },
-                                    { id: 'sWLFq1ye', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: g7' },
-                                    { id: 'CYxojPL8', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: g2' },
-                                    { id: 'ibQTtBrh', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: h7' },
-                                    { id: 'HrnnZkq2', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: h2' },
-                                    { id: 'lmnkfW6h', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: h7-g7' },
-                                    { id: 'CZiXjjlO', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: h2-g2' },
-                                    { id: 'SW2Hae7b', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: f7' },
-                                    { id: '8K7hNvfx', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: f2' },
-                                    { id: 'wOGQWSDz', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: h6' },
-                                    { id: 'ktXWvbDD', studyId: 'iPMA8QDZ', api: 'lichess', titulo: 'Sacrificios en el enroque: h3' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec6',
-                                titulo: '6. 7 TRUQUITOS para SORPRENDER a tus rivales',
-                                subtitulo: '30 capítulos',
-                                sublecciones: [
-                                    { id: 'a6bgbj1c', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Intro' },
-                                    { id: 'i7gN5DKy', studyId: 'jS09Niqb', api: 'lichess', titulo: '1️⃣ Pinchito' },
-                                    { id: 'kVut3Wo2', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Pinchito · Ejercicio 1' },
-                                    { id: 'Nw8MUio2', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Pinchito · Ejercicio 2' },
-                                    { id: 'q2Ep8CGz', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Pinchito · Ejercicio 3' },
-                                    { id: 'rseIPGA2', studyId: 'jS09Niqb', api: 'lichess', titulo: '2️⃣ Ataque doble' },
-                                    { id: 'J1A13jGD', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Ataque doble · Ejercicio 1' },
-                                    { id: 'MAeevXeD', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Ataque doble · Ejercicio 2' },
-                                    { id: 'BIteCDju', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Ataque doble · Ejercicio 3' },
-                                    { id: 'SDX7GBO1', studyId: 'jS09Niqb', api: 'lichess', titulo: '3️⃣ Ataque a la descubierta' },
-                                    { id: 'U4qZzGIs', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Descubierta · Ejercicio 1' },
-                                    { id: 'hSw5Whjr', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Descubierta · Ejercicio 2' },
-                                    { id: 'VV0SVsZd', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Descubierta · Ejercicio 3' },
-                                    { id: 'vGJMjS4P', studyId: 'jS09Niqb', api: 'lichess', titulo: '4️⃣ La pieza atrapada' },
-                                    { id: 'Td00F2jd', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Pieza atrapada · Ejercicio 1' },
-                                    { id: '624P22ar', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Pieza atrapada · Ejercicio 2' },
-                                    { id: 'fUGoNGWZ', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Pieza atrapada · Ejercicio 3' },
-                                    { id: 'LFoQ62Ud', studyId: 'jS09Niqb', api: 'lichess', titulo: '5️⃣ La desviación' },
-                                    { id: 'x5ITnEau', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Desviación · Ejercicio 1' },
-                                    { id: 'TzmQLnqc', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Desviación · Ejercicio 2' },
-                                    { id: '2osb4lkV', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Desviación · Ejercicio 3' },
-                                    { id: 'yh3FD42F', studyId: 'jS09Niqb', api: 'lichess', titulo: '6️⃣ La clavada' },
-                                    { id: 'YyOlnM1m', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Clavada · Ejercicio 1' },
-                                    { id: '7uImpXlz', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Clavada · Ejercicio 2' },
-                                    { id: 'D1HkSaoB', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Clavada · Ejercicio 3' },
-                                    { id: 'zFmclHcL', studyId: 'jS09Niqb', api: 'lichess', titulo: '7️⃣ La pieza sobrecargada' },
-                                    { id: '9w6yN7Rb', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Sobrecargada · Ejercicio 1' },
-                                    { id: 'g0UKnHj6', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Sobrecargada · Ejercicio 2' },
-                                    { id: 'Do2gNNmN', studyId: 'jS09Niqb', api: 'lichess', titulo: 'Sobrecargada · Ejercicio 3' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec7',
-                                titulo: '7. Los 7 Patrones de JAQUE MATE para GANAR en AJEDREZ',
-                                subtitulo: '22 capítulos',
-                                sublecciones: [
-                                    { id: 'jwN2fahC', studyId: 'eIQL6hqU', api: 'lichess', titulo: '7 JAQUE MATES PARA GANAR' },
-                                    { id: 'oh9SdB6r', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#1 Mate de la maquinilla' },
-                                    { id: '6uB3FDt0', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#2 Mate de la maquinilla' },
-                                    { id: 'RlqkEsZT', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#3 Mate de la maquinilla' },
-                                    { id: 'xe7UNPOH', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#4 Mate de Greco' },
-                                    { id: 'mYL90nL5', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#5 Mate de Greco' },
-                                    { id: 'IiSmvOTv', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#6 Mate de Greco' },
-                                    { id: 'lYUHDTQ5', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#7 Mate del loco' },
-                                    { id: 'i9aYgUWH', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#8 Mate del loco' },
-                                    { id: 'Ha4ZRcZe', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#9 Mate del loco' },
-                                    { id: 'F43PgQLZ', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#10 Mate del pasillo' },
-                                    { id: '9WVfxdTU', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#11 Mate del pasillo' },
-                                    { id: 'tj7qGwRU', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#12 Mate del pasillo' },
-                                    { id: 'F4ub5UcM', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#13 Mate de Andersen' },
-                                    { id: 'MJajmq9C', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#14 Mate de Andersen' },
-                                    { id: 'SkK0YNRk', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#15 Mate de Andersen' },
-                                    { id: 'ew2CuAvo', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#16 Mate de Lolli' },
-                                    { id: 'DDCVGlSc', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#17 Mate de Lolli' },
-                                    { id: 'XJyfaazG', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#18 Mate de Lolli' },
-                                    { id: 'xH7apHfu', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#19 Mate de la coz' },
-                                    { id: 'Gjl0VyeY', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#20 Mate de la coz' },
-                                    { id: 'NocyGxy1', studyId: 'eIQL6hqU', api: 'lichess', titulo: '#21 Mate de la coz' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec8',
-                                titulo: '8. Los 7 FINALES que DEBES CONOCER para GANAR',
-                                subtitulo: '21 capítulos',
-                                sublecciones: [
-                                    { id: 'cEtOrGP9', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Intro' },
-                                    { id: 'At3pf29X', studyId: 'tP8G5efW', api: 'lichess', titulo: '1️⃣ Rey y Peón VS Rey' },
-                                    { id: 'AwLvHBGL', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Rey y Peón · Posición 1' },
-                                    { id: 'OEwAAGOF', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Rey y Peón · Posición 2' },
-                                    { id: 'bsooDzWE', studyId: 'tP8G5efW', api: 'lichess', titulo: '2️⃣ Rey por delante del peón vs Rey' },
-                                    { id: 'ZvB0yFid', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Rey delante · Posición 1' },
-                                    { id: 'v69Ti5SL', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Rey delante · Posición 2' },
-                                    { id: '0dmgir5W', studyId: 'tP8G5efW', api: 'lichess', titulo: '3️⃣ Regla del cuadrado' },
-                                    { id: 'VRoOzv1w', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Regla del cuadrado · Posición 1' },
-                                    { id: '9H0SA0bq', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Regla del cuadrado · Posición 2' },
-                                    { id: 'NDRGfVxH', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Regla del cuadrado · Posición 3' },
-                                    { id: 'oN6eQzeH', studyId: 'tP8G5efW', api: 'lichess', titulo: '4️⃣ Zugzwang' },
-                                    { id: 'mlornhSx', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Zugzwang · Posición 1' },
-                                    { id: 'vcMUIdVD', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Zugzwang · Posición 2' },
-                                    { id: '2t7Rg6ER', studyId: 'tP8G5efW', api: 'lichess', titulo: '5️⃣ Finales con peón de más' },
-                                    { id: 'Y9nj3qlr', studyId: 'tP8G5efW', api: 'lichess', titulo: '6️⃣ Rey, Alfil y Peón vs Rey' },
-                                    { id: 'Vl75tcRY', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Alfil y Peón · Posición 1' },
-                                    { id: '5qYV04ml', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Alfil y Peón · Posición 2' },
-                                    { id: 'jiNy7vV8', studyId: 'tP8G5efW', api: 'lichess', titulo: '7️⃣ Dama vs peón' },
-                                    { id: 'a1UTRaL4', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Dama vs peón · Posición 1' },
-                                    { id: 'Mnlz2ey7', studyId: 'tP8G5efW', api: 'lichess', titulo: 'Dama vs peón · Posición 2' },
-                                ]
-                            },
-                            {
-                                id: 'sec0-lec9',
-                                titulo: '9. EXTRA: 100 TIPS para MEJORAR en Ajedrez (Parte I)',
-                                subtitulo: '51 consejos',
-                                sublecciones: [
-                                    { id: 'ZkKg3IOL', studyId: 'KgyDnUgh', api: 'lichess', titulo: 'INTRO' },
-                                    { id: 'K0Ss24jg', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No cambies una pieza desarrollada por una no desarrollada' },
-                                    { id: 'vMcztGgk', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No muevas dos veces la misma pieza en la apertura' },
-                                    { id: 'nqq6WawI', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Intenta que tu rival no se enroque' },
-                                    { id: 'wYsY3pRe', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Enroca lo antes posible y crea rupturas' },
-                                    { id: 'Smd86CcA', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Desarrolla tus piezas lo más rápido posible' },
-                                    { id: 'Spo45NRt', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No abras la posición si tienes menos desarrollo' },
-                                    { id: 'N7otQGJq', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Coloca la dama en casillas seguras' },
-                                    { id: 'Ocgn6Fud', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Usa las mejores diagonales para tus alfiles' },
-                                    { id: 'kGYKrcJe', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No cambies sin motivo un alfil que clava un caballo' },
-                                    { id: 'B8B8ihbN', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Si tu rival no está enrocado, busca rupturas en el centro' },
-                                    { id: 'evzZH9FR', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Piensa desde un inicio dónde desarrollarás tus piezas' },
-                                    { id: 'Ff4FygLS', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ Los caballos en un lateral son solo la mitad de un caballo' },
-                                    { id: 'XwWRe3wM', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No hagas jugadas innecesarias de peón en la apertura' },
-                                    { id: 'FIJeIhOX', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Sé flexible con tus planes, modifícalos si es necesario' },
-                                    { id: 'RAExQqEl', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Si te sorprenden en la apertura, juega de forma natural' },
-                                    { id: 'Eh3NrSPo', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Bloquea con tus peones las diagonales de los alfiles rivales' },
-                                    { id: 'DYBIiJrR', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Utiliza la clavada para crear problemas a tu rival' },
-                                    { id: 'zUJKgym1', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No cambies piezas cuando tengas más espacio' },
-                                    { id: '7vatCkUk', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No cambies damas cuando el rey rival esté más inseguro' },
-                                    { id: 'N6XRWdwm', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Coloca tus torres en columnas abiertas o semiabiertas' },
-                                    { id: 'NBFzerDn', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Los peones cuanto más al centro más valor tienen' },
-                                    { id: '80PtSBQZ', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No alejes demasiado la dama de la defensa de tu rey' },
-                                    { id: 'byKj0D8g', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Busca rutas a casillas débiles para tus caballos' },
-                                    { id: 'emes6oBd', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Cambia piezas cuando tengas ventaja de material' },
-                                    { id: 'kzmFFfoP', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No cambies sin motivo alfiles por caballos en posiciones abiertas' },
-                                    { id: 'fVDrdpDf', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No avances demasiado tus peones, pueden ser una debilidad' },
-                                    { id: 'KTO66l95', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Prevé el mate del pasillo' },
-                                    { id: 'a9PHdvxN', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Anticípate a los planes de tu rival' },
-                                    { id: 'Lz4QIYdX', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Cambia tus peones laterales por peones centrales' },
-                                    { id: 'YmB9VdMz', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Mantén tus piezas cerca del centro' },
-                                    { id: 'PD3uKmhk', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Con control del centro, el ataque es más fácil' },
-                                    { id: 'm7I4vY6P', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ Piensa bien cada avance de peón para no crear debilidades' },
-                                    { id: 'D8Arbm6J', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Piensa detenidamente los sacrificios cerca del rey' },
-                                    { id: 'O2nlZVs2', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ El caballo es una excelente pieza bloqueadora de pasados' },
-                                    { id: 'hmqbKfOG', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Cambia tus piezas pasivas por piezas activas del rival' },
-                                    { id: 'RHfJTg8m', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Si hay una columna abierta, intenta ganar el control' },
-                                    { id: '1Uh56XCD', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Con pareja de alfiles, abre la posición todo lo posible' },
-                                    { id: 'EPKRkVTV', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Si el rival tiene la pareja de alfiles, cambia uno' },
-                                    { id: 'H6385QSz', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Coloca tu dama a tres casillas en diagonal al caballo rival' },
-                                    { id: '8jApS7UO', studyId: 'KgyDnUgh', api: 'lichess', titulo: '❌ No sobrecargues tus piezas en la defensa' },
-                                    { id: '2akqxPre', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Cuando un alfil clava tu caballo, atácalo con el peón' },
-                                    { id: 'KvrLGFpH', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Elimina la mejor pieza del rival' },
-                                    { id: 'hYpf2hMJ', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Mantén tus piezas protegidas' },
-                                    { id: 'L5CCzIwZ', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Coloca tus piezas en casillas de distinto color del alfil rival' },
-                                    { id: 'dCXjBWH8', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Deshazte de la clavada del rival en buenas condiciones' },
-                                    { id: 'lumrYYvI', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Analiza el por qué de cada jugada y anticípate' },
-                                    { id: 'FsDtSCoP', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Mejora la posición de tus piezas' },
-                                    { id: 'MQYwRP0U', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Si estás perdido, busca jugadas que incomoden al rival' },
-                                    { id: '47TwQMkG', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Si te atacan en un lateral reacciona en el centro' },
-                                    { id: 'cgxijFUB', studyId: 'KgyDnUgh', api: 'lichess', titulo: '✅ Intenta cambiar el alfil fianchettado del rival' },
-                                ]
-                            },
-                        ]
-                    },
-                    {
-                        id: 'sec1',
-                        nombre: 'Aperturas',
-                        lecciones: [
-                            {
-                                id: 'lec1-previa',
-                                titulo: '1. Lección previa: Desarrollo, centro y rey seguro',
-                                subtitulo: '20 temas: centro, desarrollo de piezas, enroque y ventaja',
-                                sublecciones: [
-                                    { id: 'NRW2RGbu', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'oMHxao9J', studyId: 'HiiSVnQy', api: 'lichess', titulo: '¿Qué es el centro del tablero?' },
-                                    { id: 'zVyRfflg', studyId: 'HiiSVnQy', api: 'lichess', titulo: '¿Por qué es importante ocupar el centro?' },
-                                    { id: 'CkgFwTjE', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Domina el centro con tus peones' },
-                                    { id: '6BmK8hSr', studyId: 'HiiSVnQy', api: 'lichess', titulo: '¿Qué es un centro móvil?' },
-                                    { id: 'm5NTgZUd', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 1 · Centro' },
-                                    { id: 'Eq2ofkIs', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 2 · Centro' },
-                                    { id: 'opUBGBYc', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Nuestro rival ignora el centro móvil' },
-                                    { id: 'YRLxBUuH', studyId: 'HiiSVnQy', api: 'lichess', titulo: '¿Cómo debemos desarrollar nuestras piezas?' },
-                                    { id: 'uuWI9UiY', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 1 · Desarrollo' },
-                                    { id: '2uaceB3Y', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 2 · Desarrollo' },
-                                    { id: 'XHki5s7B', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 3 · Desarrollo' },
-                                    { id: 'CFdwFZgC', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 4 · Desarrollo' },
-                                    { id: 'toQWnhE7', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 5 · Desarrollo' },
-                                    { id: 'ma1zZMmx', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 6 · Desarrollo' },
-                                    { id: 'GBLtPRng', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Aprovechando la ventaja de desarrollo' },
-                                    { id: 'ibXMRjIC', studyId: 'HiiSVnQy', api: 'lichess', titulo: '¿Por qué hay que enrocar rápido?' },
-                                    { id: 'kvWHjUJw', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 7 · Enroque' },
-                                    { id: 'z4OFTIKj', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 8 · Enroque' },
-                                    { id: 'N6hrBL7p', studyId: 'HiiSVnQy', api: 'lichess', titulo: 'Ejercicio 9 · Enroque' },
-                                ]
-                            },
-                            {
-                                id: 'lec2-repertorio',
-                                titulo: '2. REPERTORIO para Aprender a Jugar contra TODO #2',
-                                subtitulo: '14 temas: Sistema Colle, Defensa Holandesa y Siciliana',
-                                sublecciones: [
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 0,  titulo: 'Intro' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 1,  titulo: '1️⃣ Sistema Colle Enigmático' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 2,  titulo: 'Sistema Colle · Variante principal' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 3,  titulo: 'Sistema Colle · c4' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 4,  titulo: 'Sistema Colle · cxd4' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 5,  titulo: 'Sistema Colle · b6' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 6,  titulo: '2️⃣ Defensa Holandesa Enigmática' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 7,  titulo: 'Holandesa · Variante principal' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 8,  titulo: 'Holandesa · Axe4' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 9,  titulo: 'Holandesa · Dc2' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 10, titulo: '3️⃣ Defensa Siciliana Enigmática' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 11, titulo: 'Siciliana · Variante principal' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 12, titulo: 'Siciliana · c4' },
-                                    { id: '1AaMi41d', api: 'prod', chapterIndex: 13, titulo: 'Siciliana · C1c3' },
-                                ]
-                            },
-                            {
-                                id: 'lec3-iniciativa',
-                                titulo: '3. 1. LA INICIATIVA',
-                                subtitulo: '14 temas: qué es la iniciativa, ejercicios y cómo frenarla',
-                                sublecciones: [
-                                    { id: 'mz3es8EL', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'E07KgD75', studyId: 'NUw1zhkZ', api: 'lichess', titulo: '¿Qué es la iniciativa?' },
-                                    { id: '4hEI2pLT', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Jugando con iniciativa' },
-                                    { id: 'kLPDIMjt', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'YRcAC7Kg', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: '6VxxE9It', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'wPcrDSRg', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'tb0dY1u3', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '9pu1uV0X', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'U5DtXieG', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'YRCZpZdk', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 8' },
-                                    { id: 'adxWzdxS', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Frenando la iniciativa' },
-                                    { id: 'UpVb7Rnw', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 9' },
-                                    { id: 'X3G1kA1u', studyId: 'NUw1zhkZ', api: 'lichess', titulo: 'Ejercicio 10' },
-                                ]
-                            },
-                            {
-                                id: 'lec4-desarrollo-defectuoso',
-                                titulo: '4. 2. EL DESARROLLO DEFECTUOSO',
-                                subtitulo: '10 temas: qué es el desarrollo defectuoso y ejercicios',
-                                sublecciones: [
-                                    { id: 'Tolzj2Ql', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'lhtoru8E', studyId: 'KRHcVaQX', api: 'lichess', titulo: '¿Qué es el desarrollo defectuoso?' },
-                                    { id: 'sD0HosBg', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'WK83RnXh', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: '3mmR6jPG', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'nUzVEZdT', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'bcC82CnP', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '3aLcxbSn', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'NCn5ObJk', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'aMt7IVya', studyId: 'KRHcVaQX', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec5-perdidas-tiempo',
-                                titulo: '5. 3. LAS PÉRDIDAS DE TIEMPO',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'eQP9JDT1', studyId: '6vE00LO6', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'vjrnN5K8', studyId: '6vE00LO6', api: 'lichess', titulo: '¿Qué son las pérdidas de tiempo?' },
-                                    { id: '1LOm7oiE', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'n5k1oJpG', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'UPjzanTS', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'QbG9pYfX', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'MNRGebFk', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'pL5zdMHM', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'ZYwGZTG7', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'eJdq42mS', studyId: '6vE00LO6', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec6-rey-centro',
-                                titulo: '6. 4. EL REY EN EL CENTRO',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'mUrr9Seq', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'wLhiF7LZ', studyId: 'El0sRRVS', api: 'lichess', titulo: '¿Cómo castigar el rey en el centro?' },
-                                    { id: 'ZrxDJZbL', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: '9GaX26Ny', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'CrxmoGln', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: '7eRnGP6D', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: '6ppUcNHF', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'bVRQ0esX', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'sL33zbfD', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'rMMzBwzc', studyId: 'El0sRRVS', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec7-clavada',
-                                titulo: '7. 5. LA CLAVADA EN LA APERTURA',
-                                subtitulo: '14 temas',
-                                sublecciones: [
-                                    { id: 'ySEVB4GD', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'h1DfxbQq', studyId: 'pZRYhCnm', api: 'lichess', titulo: '¿Qué es la clavada en la apertura?' },
-                                    { id: 'auIxB2if', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'OQuNppnK', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'gzVjbu5g', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: '2NhpNiHK', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: '6SU1UZ9y', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '5AzVF3d5', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'tMn0uzJF', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'VoAygZMq', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 8' },
-                                    { id: '51MI5lUg', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 9' },
-                                    { id: 'eyojCpPS', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 10' },
-                                    { id: 'Od4MAGqE', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 11' },
-                                    { id: 'eT8qcqlN', studyId: 'pZRYhCnm', api: 'lichess', titulo: 'Ejercicio 12' },
-                                ]
-                            },
-                            {
-                                id: 'lec8-peones',
-                                titulo: '8. 6. LA IMPORTANCIA DE LOS PEONES',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'OoTBnMG2', studyId: 'UDruehC1', api: 'lichess', titulo: 'Introducción' },
-                                    { id: '4kogJ8mF', studyId: 'UDruehC1', api: 'lichess', titulo: 'Los movimientos de peones en la apertura' },
-                                    { id: 'uP8k9iDn', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'oRcQ5hcZ', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: '0b5Hd3xn', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: '1cPIxfLL', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: '1IqULtCA', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'pOQ1gcWh', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'Jc4K3Nyx', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'HhsJbjLO', studyId: 'UDruehC1', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec9-sacrificio-peon',
-                                titulo: '9. 7. EL SACRIFICIO DE PEÓN EN LA APERTURA',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'QB2sHJIS', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'DkdM6jvi', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'El sacrificio de peón' },
-                                    { id: 'hIueXnBL', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'dWfyVbYU', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: '649yYp9g', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'uTNJ34Kb', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'QkWK0Bov', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '42rkli59', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'kGu0L1FK', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'UX5S46w0', studyId: 'tZnxZ3xC', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec10-recursos-tematicos',
-                                titulo: '10. 8. RECURSOS TEMÁTICOS EN LA APERTURA',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'b8pT37m6', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'rbhb780u', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Recursos temáticos en la apertura' },
-                                    { id: 'GQR2u7v5', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'rY7CCumm', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'gOmExRFi', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'mxjwz2qC', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'iPgsNITO', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'Ks5x74EL', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: '630m0sk7', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: '9kXeMMUH', studyId: 'JKfGryGv', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec11-rival',
-                                titulo: '11. 9. TIENES UN RIVAL ENFRENTE',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'XEZkOxXi', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'JSIbGTEy', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Tienes un rival enfrente' },
-                                    { id: '7YdRpZAV', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'yaY2tn8S', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'xmZQMnkI', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'pcIcXxYY', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'BTobtdWQ', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '4iZRnw7g', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'chJAsTCV', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'JMjYFBOw', studyId: 'Oi9S9XRE', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec12-puntos-clave',
-                                titulo: '12. 10. PUNTOS CLAVES EN LA APERTURA',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: '2KoX1bVQ', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'AtaELMQj', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Puntos claves en la posición' },
-                                    { id: 'iLXkXbyv', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'y6rX7d6P', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'eor5iZmZ', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'Zhrtqi76', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'aOtsmnUL', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'IB4Gs0kC', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'Z7FQgX1K', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'yrEnVcN1', studyId: '9GWlBvNS', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec13-abiertas',
-                                titulo: '13. 11. PUNTOS CLAVES: Aperturas abiertas',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'l3hM1Duz', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'AdX7Daov', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Puntos claves en posiciones abiertas' },
-                                    { id: 'ZRu7HePI', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'BoVO59Gd', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'Q0F0ivwj', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'NpxCNv5x', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'fpOZQ07O', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'V4L3xdii', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'xrEPi3G8', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: '4apQ1eTe', studyId: 'i0dQ547A', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec14-cerradas',
-                                titulo: '14. 12. PUNTOS CLAVES: Aperturas cerradas',
-                                subtitulo: '11 temas',
-                                sublecciones: [
-                                    { id: 'c4k0lqAg', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'tiXESuDL', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Puntos claves en posiciones cerradas' },
-                                    { id: '21tWBIVy', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'CWEIwvuy', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'BfxwtoJt', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'v5TbppP7', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'Ubm1Zolu', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '17Pa3VgU', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'B9k0QuH2', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'YTNRVibH', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 8' },
-                                    { id: 'Mx022imY', studyId: 'lJr3C4j3', api: 'lichess', titulo: 'Ejercicio 9' },
-                                ]
-                            },
-                            {
-                                id: 'lec15-semiabiertas',
-                                titulo: '15. 13. PUNTOS CLAVES: Aperturas semiabiertas',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'JtS9HtAp', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'xBdzwoji', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Puntos claves en posiciones semiabiertas' },
-                                    { id: 'uWsgvWY9', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'HZt9qGSH', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'ELhWeWTC', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: '1XeNkrhD', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: '9s5vWZbd', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '3coEfO1z', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'eElAUUdy', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'FvWezE1q', studyId: 'zNNtbIUZ', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec16-semicerradas',
-                                titulo: '16. 14. PUNTOS CLAVES: Aperturas semicerradas',
-                                subtitulo: '10 temas',
-                                sublecciones: [
-                                    { id: 'NWwzQ6nz', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Introducción' },
-                                    { id: '9qOYv517', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Puntos claves en posiciones semicerradas' },
-                                    { id: 'YdpKKBzk', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: '8MkFQ1hO', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'qR5QBzML', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'M7vTpVJR', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'AicUFGlJ', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'vOM3OToi', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'NB5RVXV6', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'A5HzwnG8', studyId: 'sUKMJ7gx', api: 'lichess', titulo: 'Ejercicio 8' },
-                                ]
-                            },
-                            {
-                                id: 'lec17-f2-f7',
-                                titulo: '17. 15. LOS PUNTOS f2-f7',
-                                subtitulo: '12 temas',
-                                sublecciones: [
-                                    { id: 'pRTZZ4jI', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'kJDV8uee', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Los puntos f2-f7' },
-                                    { id: '3bcxO2A4', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'l0HWfdEm', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'APnprXdW', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: '9y0BqydV', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'txD1StJI', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'ClhIitmN', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'BmumH2Ob', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: '5zBVKGpi', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 8' },
-                                    { id: 'IXihLKjd', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 9' },
-                                    { id: '9s9iRECs', studyId: 'uTSyxIsd', api: 'lichess', titulo: 'Ejercicio 10' },
-                                ]
-                            },
-                            {
-                                id: 'lec18-sacrificio-g4-g5',
-                                titulo: '18. 16. EL SACRIFICIO EN g4-g5',
-                                subtitulo: '12 temas',
-                                sublecciones: [
-                                    { id: 'wKh5WmaS', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Introducción' },
-                                    { id: 'BC3lI8K1', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'El sacrificio en g4-g5' },
-                                    { id: 'zNxW0cna', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'jCsygBq9', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'BhyHk1PV', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'WuPEM5FS', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'LoLX7eN7', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: 'SHpfiLXd', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: 'NYJoaXiu', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: 'BddgCUMJ', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 8' },
-                                    { id: '33Sq32yL', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 9' },
-                                    { id: 'iw5XVS0S', studyId: 'oaKUrJzS', api: 'lichess', titulo: 'Ejercicio 10' },
-                                ]
-                            },
-                            {
-                                id: 'lec19-test-m1',
-                                titulo: '19. TEST PRÁCTICO M1: APERTURAS',
-                                subtitulo: '16 ejercicios de evaluación',
-                                sublecciones: [
-                                    { id: 'VsnqR2dD', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Test Práctico M1 Aperturas' },
-                                    { id: 'PBQahSPK', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 1' },
-                                    { id: 'tcGkplk8', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 2' },
-                                    { id: 'iNlRjyRv', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 3' },
-                                    { id: 'zWwgM0FT', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 4' },
-                                    { id: 'gr3NNzJT', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 5' },
-                                    { id: '5VGPkP6W', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 6' },
-                                    { id: '8CEbNcP2', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 7' },
-                                    { id: '8Rkc8gxk', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 8' },
-                                    { id: 'TWWGfkds', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 9' },
-                                    { id: 'gmcLXEf6', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 10' },
-                                    { id: 'PCNYl0f9', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 11' },
-                                    { id: 'cNWjiz9W', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 12' },
-                                    { id: 'BSv34TXn', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 13' },
-                                    { id: 'js1qJ6YN', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 14' },
-                                    { id: 'mJBxCCEI', studyId: 'gbCgOpk0', api: 'lichess', titulo: 'Ejercicio 15' },
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        id: 'sec2',
-                        nombre: 'Módulo 2: Estrategia I',
-                        lecciones: [
-                            { id: 'lec17-valor-piezas', titulo: '17. El valor relativo de las piezas', sublecciones: [
-                                { id: 'y0KFgYqN', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'zRl37fEU', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'El valor relativo de las piezas' },
-                                { id: 'fpWrrlJW', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'yErYPXsT', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'jrfHzpIQ', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'C3bVEHyU', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'Yf8B8e3V', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'QM8kEBzR', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'hlDy4kHf', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'mmgfLvIn', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'xNhIihqq', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'Rfy2UvJr', studyId: 'yMTUkc2s', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec18-pareja-alfiles', titulo: '18. La pareja de alfiles', sublecciones: [
-                                { id: 'MFtIbLqF', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Introducción' },
-                                { id: '8qY2Etbd', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'La pareja de alfiles' },
-                                { id: 'Hrk1PTe8', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'AmoLiuoy', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'ImEX4uU1', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'nP1x2YlD', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'sK9H6O85', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'm1duUKM7', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: '8h62teFN', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'JDEqwhrH', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'CthJVQbv', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'eTnLPjdd', studyId: 'WKvkCiMr', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec19-dominio-central', titulo: '19. El dominio central', sublecciones: [
-                                { id: '8hdUqFfu', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'mEMBSf2r', studyId: 'chmQxl4m', api: 'lichess', titulo: 'El dominio central' },
-                                { id: 'rsQhSTSi', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'DjkaDJYZ', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'vBOnJgkB', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: '52K27AgZ', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'RyzHMZgY', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'fS8R2UsS', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: '7gaVdRzo', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'wHyuooBP', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'Y4lBa0b8', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'swOXYHDW', studyId: 'chmQxl4m', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec20-limitar-piezas', titulo: '20. Cómo limitar las piezas del rival', sublecciones: [
-                                { id: '6GduKGIy', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'tzGlBdu8', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Cómo limitar las piezas al rival' },
-                                { id: 'DwLREZH6', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'pAtPoNAX', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'utvLXhE0', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'JsYdDWvR', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'ROOCIVFB', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: '7h6q5QYa', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'mkrnJ5vz', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'q4xQHcc5', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: '55bAjqPL', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'vHid2Hzh', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 10' },
-                                { id: 'Pa0NujI1', studyId: 'j56tlpoG', api: 'lichess', titulo: 'Ejercicio 11' },
-                            ]},
-                            { id: 'lec21-evaluar-posicion', titulo: '21. Cómo evaluar una posición', sublecciones: [
-                                { id: 'Z41dbUuz', studyId: 'evYqahls', api: 'lichess', titulo: 'Introducción' },
-                                { id: '0SAe6o30', studyId: 'evYqahls', api: 'lichess', titulo: 'Cómo evaluar una posición' },
-                                { id: 'MkGLn6Po', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'vSckwY3R', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'crr5RFTm', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'UDw0cuUD', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'O4jj99aZ', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'bc2A5Wto', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'SuQ5CKpc', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: '2FZoULJc', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'QKMrm4uw', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'UihUvciE', studyId: 'evYqahls', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec22-caballo', titulo: '22. Potencia tus piezas: el caballo', sublecciones: [
-                                { id: 'TqSTIVrg', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'qmT91wXJ', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Potencia tus piezas: el caballo' },
-                                { id: 'KNeFDu8y', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'REWcSr26', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'k7XRNuxk', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'tGtXzG3r', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'qKburuGU', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'vim74jvh', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'TicujA5z', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'iBKOOgFo', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'UhxkVUth', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: '0RmFAsBs', studyId: 'K8JbCcei', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec23-alfil', titulo: '23. Potencia tus piezas: el alfil', sublecciones: [
-                                { id: 'wQLWFZBV', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'NAqBjGIZ', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Potencia tus piezas: el alfil' },
-                                { id: 'JioCZfnT', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'oeHRW6WY', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'rZ4qjgYK', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'Mb2oZzJe', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'nlrQaE8y', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'H0j5jF8C', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'YMFh7EqK', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: '0qQU7YgG', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'Tlz8GDAt', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'WhTNOr5z', studyId: 'IMvVD5lp', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec24-torre', titulo: '24. Potencia tus piezas: la torre', sublecciones: [
-                                { id: 'HPcHX11T', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Introducción' },
-                                { id: '5VabBPHI', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Potencia tus piezas: la torre' },
-                                { id: 'fe2632AO', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'RS1r2OQN', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'NvMgUtsb', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'C5SpLjOi', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'HmAum3yp', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'lQxjlvaE', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'WfPYJlod', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'oHoKUsrf', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'xfOKX4NX', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'CShAIXw6', studyId: '6Nid4nhG', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec25-dama', titulo: '25. Potencia tus piezas: la dama', sublecciones: [
-                                { id: 'PZqCW1It', studyId: 'q8962q9b', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'wuYLjNt7', studyId: 'q8962q9b', api: 'lichess', titulo: 'Potencia tus piezas: la dama' },
-                                { id: 'N2j90BNm', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'PkmCpp9I', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'vjKkMvi3', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'rtqt9EoA', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: '6W8IBzj6', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'aHBOe3El', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'kZJJjQ6c', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'SBiw595e', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: '8SPux1bu', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'M6S66rvb', studyId: 'q8962q9b', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec26-dinamismo', titulo: '26. Dinamismo en ajedrez', sublecciones: [
-                                { id: 'LbkgOFj6', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'HQ3P7TZo', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Dinamismo en ajedrez' },
-                                { id: '5zZ1fguS', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'RzETSMzK', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'cbgrhCeE', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: '3Bb9HaFz', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'tJTnzBn2', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: '2S11NNph', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'Bh8xFbRR', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: '1eo5rCV4', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'V2GvQbY3', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'Xafi56qR', studyId: 'xv1c9qiC', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec27-ventajas-dinamicas', titulo: '27. Ganando con pequeñas ventajas dinámicas', sublecciones: [
-                                { id: 'tzrZ21AC', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'NTaCVYEr', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ganando con pequeñas ventajas dinámicas' },
-                                { id: 'b4zwEU8G', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'bKqmsZ0y', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'TLu8PFnE', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: '2Ldut4rO', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'FL0S2AAd', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'uorQh5j7', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: '2yimeJ1A', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'unKFczsw', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'Ypa5iG2B', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'NL5ikC8R', studyId: 'FQYjscj7', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec28-armonia-piezas', titulo: '28. La armonía de las piezas', sublecciones: [
-                                { id: 'P1sLhBW6', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'ov5mfR7f', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'La armonía de las piezas' },
-                                { id: '568p0haA', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'wb5WdWTz', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'YEekFUo1', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'DxAkBUbA', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: '8Tl862BE', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: '7IitVzJm', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: '96CiZ6zr', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: '2a7I3hu5', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'a8gyOAFK', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'mvFVzrGH', studyId: 'pYQbVwLz', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec29-piezas-mal-colocadas', titulo: '29. Piezas mal colocadas', sublecciones: [
-                                { id: 'zzQ2ap51', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'CGNOacZQ', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Piezas mal colocadas' },
-                                { id: 'LbGLOULi', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'lMwvE5cT', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'Tcw6PuAJ', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'OjQHooJX', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'KScFO2zs', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'oEp60x3b', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'PdQEuml6', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'OUBNqdmd', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'DFTpgDMv', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'lhE0iKrG', studyId: 'ZufP32FM', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec30-casillas-debiles', titulo: '30. Casillas débiles', sublecciones: [
-                                { id: 'NrP90DE7', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'lIE4qQRH', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Casillas débiles' },
-                                { id: 'aoBU5jii', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: '0aypClXg', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: '1mSROgNF', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: '4Hc9nDAD', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'Gp5DpgJC', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'vccxroVV', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'iYl3C7tD', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'NbjqaSPg', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'dQFzYevg', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'N11XrAaU', studyId: 'vk1FbY0T', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec31-debilidades-enroque', titulo: '31. Debilidades del enroque', sublecciones: [
-                                { id: 'Xll6clnJ', studyId: '8d1rcknU', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'NvJNzILb', studyId: '8d1rcknU', api: 'lichess', titulo: 'Debilidades en el enroque' },
-                                { id: 'GhXe20bM', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'zzcPr2WP', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'ZUJgYgg3', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'lY000wxl', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'EZiXY5fI', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'Ebhf3Ob1', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'iLUncVwb', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'T2xXNLii', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'jC6VDDrx', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'AFd6fmSX', studyId: '8d1rcknU', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec32-ventajas-pequenas', titulo: '32. Ganando con pequeñas ventajas', sublecciones: [
-                                { id: '2kvF8Hgl', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Introducción' },
-                                { id: '9sODidrn', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ganando con pequeñas ventajas' },
-                                { id: 'pw33jPE6', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'rCHEDIKf', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'NpBJpWsi', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'Ax5TEGQK', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'FgQQ83hy', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: '0QSZ3kZk', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 's96zy5aB', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'lLzpSmTn', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'bIbTH82K', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'CRFCvQyQ', studyId: 'fXwjalvl', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec33-enroques-opuestos', titulo: '33. Enroques opuestos', sublecciones: [
-                                { id: 'DLoXj191', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Introducción' },
-                                { id: 'jN5jwyri', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Enroques opuestos' },
-                                { id: 'Dw9FdOW7', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'o3FWpKeF', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'kiRwBIgh', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'x9RUKSQv', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'CN46cxgQ', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: 'VcuLba6a', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'XabORBe6', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: 'qyT6oZvG', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: 'TeInGm7P', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'EltlNNfz', studyId: 'zW79bMzY', api: 'lichess', titulo: 'Ejercicio 10' },
-                            ]},
-                            { id: 'lec34-test-m2', titulo: '34. TEST PRÁCTICO M2: ESTRATEGIA I', sublecciones: [
-                                { id: 'V9teaKhj', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'TEST PRÁCTICO M2: ESTRATEGIA I' },
-                                { id: 'C82P0mnD', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 1' },
-                                { id: 'KZDQ9RRR', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 2' },
-                                { id: 'vDLpQO7S', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 3' },
-                                { id: 'BbBdqWFb', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 4' },
-                                { id: 'c187cRtq', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 5' },
-                                { id: '3YM3njUe', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 6' },
-                                { id: 'ju0KUfbA', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 7' },
-                                { id: '0BZ7cuAX', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 8' },
-                                { id: '1N1YZOBm', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 9' },
-                                { id: 'oQXkud5C', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 10' },
-                                { id: 'fgkmwrKu', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 11' },
-                                { id: 'wLhROdNz', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 12' },
-                                { id: 'HSbHV5NR', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 13' },
-                                { id: 'kzygA8uP', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 14' },
-                                { id: 'F7LD63Kp', studyId: 'aFaUUUI6', api: 'lichess', titulo: 'Ejercicio 15' },
-                            ]},
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 'la-fuerza-en-el-calculo',
-                nombre: 'La fuerza en el Cálculo',
-                descripcion: 'Por Miguel Santos Ruiz · GM ElGafas',
-                secciones: [
-                    {
-                        id: 'leccion-1',
-                        nombre: 'Lección 1',
-                        lecciones: [
-                            { id: 'DChlj3dN', titulo: '1.1 Jaques',                  subtitulo: 'Defensa Damiano + combinaciones de jaque' },
-                            { id: 'uIYI9FDF', titulo: '1.2 Capturas',                 subtitulo: 'Ejercicios de capturas de material' },
-                            { id: '2uvCL8PV', titulo: '1.3 Amenazas',                 subtitulo: 'Alekhine Defense + cálculo de amenazas' },
-                            { id: 'xukmDVgO', titulo: '1.4 Ataca con ímpetu',         subtitulo: 'Principios de ataque e iniciativa' },
-                            { id: 'ecdLyfzU', titulo: '1.5 Cuando lanzar un ataque',  subtitulo: 'Condiciones y timing del ataque' },
-                            { id: 'b9DszJ9i', titulo: '1.6 Ataque de color',          subtitulo: 'Dominio de casillas de un color' },
-                        ]
-                    },
-                    {
-                        id: 'leccion-2',
-                        nombre: 'Lección 2',
-                        lecciones: [
-                            { id: 'f1r9CS1z', titulo: '2.1 Desatascador',                    subtitulo: 'Técnicas para desbloquear posiciones' },
-                            { id: 'dwnJ46B4', titulo: '2.2 Elección de jugadas candidatas',   subtitulo: 'Cálculo y selección de candidatas' },
-                            { id: 'FTwSXNPE', titulo: '2.3 Eliminación',                      subtitulo: 'Eliminación de defensores y piezas clave' },
-                            { id: '1OL0CsLQ', titulo: '2.4 Comparación',                      subtitulo: 'Comparación de planes y variantes' },
-                        ]
-                    },
-                    {
-                        id: 'leccion-3',
-                        nombre: 'Lección 3',
-                        lecciones: [
-                            { id: 'xxqyWNI5', titulo: '3.1 Cálculo concreto',  subtitulo: 'Técnicas de cálculo preciso' },
-                            { id: 'tx22CTOV', titulo: '3.2 Cálculo práctico',  subtitulo: 'Aplicación práctica del cálculo' },
-                        ]
-                    },
-                    {
-                        id: 'leccion-4',
-                        nombre: 'Lección 4',
-                        lecciones: [
-                            { id: '8UVrp2Sz', titulo: '4.1 Profilaxis',        subtitulo: 'Prevención de amenazas del rival' },
-                            { id: 'LmJ6hvmC', titulo: '4.2 Ataques de pánico', subtitulo: 'Reconocer y evitar jugadas de pánico' },
-                            { id: 'bK51OxSZ', titulo: '4.3 Contraataque',      subtitulo: 'Responder al ataque con contrajuego' },
-                        ]
-                    },
-                    {
-                        id: 'leccion-5',
-                        nombre: 'Lección 5',
-                        lecciones: [
-                            { id: 'wxiPLA0W', titulo: '5.1 Omisión de jugadas intermedias', subtitulo: 'Errores típicos al ignorar jugadas intermedias' },
-                            { id: 'JtAU4Aw4', titulo: '5.2 Caer en la trampa',              subtitulo: 'Reconocer y evitar trampas posicionales' },
-                            { id: 'suxADKyz', titulo: '5.3 Los movimientos de retroceso',   subtitulo: 'Cuándo y cómo retroceder piezas' },
-                            { id: 'Wevwm9a9', titulo: '5.4 Relajación',                     subtitulo: 'Errores por relajarse en posición ganadora' },
-                            { id: 'FV3e9meQ', titulo: '5.5 Anclaje',                        subtitulo: 'Sesgo cognitivo del anclaje en el cálculo' },
-                        ]
-                    },
-                    {
-                        id: 'leccion-6',
-                        nombre: 'Lección 6',
-                        lecciones: [
-                            { id: 'gqAH7l8A', titulo: '6.1 Visión combinatoria', subtitulo: 'Detectar combinaciones y motivos tácticos' },
-                            { id: 'QOL1kifX', titulo: '6.2 Visualización',       subtitulo: 'Visualizar posiciones futuras en el tablero' },
-                            { id: 'cBslgC0C', titulo: '6.3 Imaginación',         subtitulo: 'Creatividad y soluciones no obvias' },
-                            { id: 'SSqjkMhu', titulo: '6.4 Estudios',            subtitulo: 'Estudios clásicos de ajedrez' },
-                        ]
-                    }
-                ]
-            }
-        ];
+        let CURSOS = [];
+        fetch('/api/cursos').then(r => r.json()).then(data => { CURSOS = data; });
 
         let pgnBoardInstance = null;
         let pgnBoardReady    = false;
+        let currentNotes     = {};
+        let notesLeccionId   = null;
+        let notesDebounce    = null;
         let pgnGames         = [];
         let pgnCurrentGame   = 0;
         let navLevel         = 'courses'; // 'courses'|'sections'|'lessons'|'sublessons'|'exercises'|'playing'
@@ -2631,19 +1987,36 @@
         let pgnMoveAccepted  = false;
 
         // --- Tab switching ---
-        $('.tab-btn').click(function() {
-            const tab = $(this).data('tab');
+        let activeTab = 'analysis';
+
+        function switchTab(tab) {
+            if (tab === activeTab) return;
+            activeTab = tab;
             $('.tab-btn').removeClass('active');
-            $(this).addClass('active');
+            $(`.tab-btn[data-tab="${tab}"]`).addClass('active');
+
             if (tab === 'analysis') {
                 $('#section-analysis').show();
-                $('#section-exercises').hide();
+                $('#section-exercises, #section-courses').hide();
+            } else if (tab === 'courses') {
+                $('#section-analysis, #section-exercises').hide();
+                $('#section-courses').show();
+                loadCursosSection();
             } else {
-                $('#section-analysis').hide();
+                $('#section-analysis, #section-courses').hide();
                 $('#section-exercises').show();
                 if (!pgnBoardReady) { initPgnBoard(); pgnBoardReady = true; }
-                if (!pgnGames.length) showCourses();
+                if (tab === 'books') {
+                    const libroCurso = CURSOS.find(c => c.id === 'libros');
+                    if (libroCurso) showSections(libroCurso);
+                } else {
+                    showCourses();
+                }
             }
+        }
+
+        $('.tab-btn').click(function() {
+            switchTab($(this).data('tab'));
         });
 
         // --- Navigation helpers ---
@@ -2653,7 +2026,7 @@
 
         function showCourses() {
             navLevel = 'courses'; currentCurso = null; currentSeccion = null; currentLeccion = null; currentSubleccion = null;
-            pgnGames = []; clearAnnotations();
+            pgnGames = []; clearAnnotations(); clearPgnSelection();
             if (pgnBoardInstance) pgnBoardInstance.position('start', false);
             hideAllPanels();
             $('#pgn-courses-panel').show();
@@ -2663,7 +2036,7 @@
             $('#btn-back-topics').hide();
 
             const $list = $('#pgn-courses-list').empty();
-            CURSOS.forEach(c => {
+            CURSOS.filter(c => c.id !== 'libros').forEach(c => {
                 const totalLecciones = c.secciones.reduce((s, sec) => s + sec.lecciones.length, 0);
                 $(`<div class="course-card">
                     <div class="course-icon"><i class="fas fa-graduation-cap"></i></div>
@@ -2683,7 +2056,11 @@
             $('#pgn-nav-bar, #pgn-feedback').hide();
             $('#pgn-status').text(''); $('#pgn-comment').hide();
             $('#ex-header-title').text(curso.nombre);
-            $('#btn-back-topics').show().html('<i class="fas fa-arrow-left"></i> Cursos');
+            if (curso.id === 'libros') {
+                $('#btn-back-topics').hide();
+            } else {
+                $('#btn-back-topics').show().html('<i class="fas fa-arrow-left"></i> Cursos');
+            }
 
             const $list = $('#pgn-sections-list').empty();
             curso.secciones.forEach(sec => {
@@ -2755,9 +2132,17 @@
             const backLabel = isSub ? currentLeccion.titulo : currentSeccion.nombre;
             $('#btn-back-topics').show().html('<i class="fas fa-arrow-left"></i> ' + backLabel);
 
+            if (leccion.api === 'video-only') {
+                $('#pgn-feedback').attr('class','waiting').html(
+                    '<i class="fas fa-video" style="margin-right:7px;"></i>Esta lección es contenido de video — no tiene ejercicios interactivos.'
+                );
+                return;
+            }
             let fetchUrl;
             if (leccion.api === 'lichess') {
                 fetchUrl = `/proxy/lichess-chapter/${leccion.studyId}/${leccion.id}`;
+            } else if (leccion.api === 'lichess-study') {
+                fetchUrl = `/proxy/lichess-study/${leccion.id}`;
             } else {
                 const proxyEndpoint = leccion.api === 'prod' ? '/proxy/study-prod' : '/proxy/study';
                 fetchUrl = `${proxyEndpoint}/${leccion.id}`;
@@ -2774,7 +2159,12 @@
                         $('#pgn-feedback').attr('class','wrong').text('✗ Error al cargar el estudio.');
                         return;
                     }
-                    showExercises();
+                    notesLeccionId = leccion.id;
+                    fetch(`/api/notas/${encodeURIComponent(leccion.id)}`)
+                        .then(r => r.json())
+                        .then(notes => { currentNotes = notes; })
+                        .catch(() => { currentNotes = {}; })
+                        .finally(() => showExercises());
                 })
                 .catch(() => {
                     $('#pgn-feedback').attr('class','wrong').text('✗ Error al cargar el estudio.');
@@ -2796,12 +2186,14 @@
             pgnGames.forEach((g, i) => {
                 const moves = g.positions.length - 1;
                 const movesLabel = g.isStatic ? 'Teoría' : `${moves} jugada${moves !== 1 ? 's' : ''}`;
+                const hasNote = currentNotes[i] && currentNotes[i].length > 0;
                 $(`<div class="exercise-card">
                     <div class="exercise-num">${i + 1}</div>
-                    <div>
+                    <div style="flex:1">
                         <div class="exercise-name">${g.title}</div>
                         <div class="exercise-moves">${movesLabel}</div>
                     </div>
+                    ${hasNote ? '<div style="font-size:13px;color:#555;" title="Tiene notas">📝</div>' : ''}
                 </div>`).on('click', () => playExercise(i)).appendTo($list);
             });
         }
@@ -2814,6 +2206,136 @@
             selectPgnGame(idx);
             $('#pgn-nav-bar').show();
         }
+
+        // ── Estado de notas ───────────────────────────────────────
+        let currentNoteId    = null;
+        let currentNoteColor = '#d4a800';
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+            return r+','+g+','+b;
+        }
+
+        function renderNoteCards(idx) {
+            const notes = currentNotes[idx] || [];
+            const $list = $('#pgn-notes-list').empty();
+            notes.forEach(n => {
+                const c = n.color || '#d4a800', rgb = hexToRgb(c);
+                $('<div class="pgn-note-card-item" data-id="'+n.id+'" style="background:rgba('+rgb+',0.08);border-color:rgba('+rgb+',0.22);border-left-color:'+c+';color:'+c+';">'
+                  +'<i class="fas fa-sticky-note" style="margin-right:5px;font-size:10px;opacity:0.7;"></i>'
+                  +'<span class="pgn-note-card-item-title">'+$('<span>').text(n.titulo||'Sin título').html()+'</span>'
+                  +'<button class="pgn-note-card-del" data-id="'+n.id+'" title="Borrar">✕</button>'
+                  +'</div>').appendTo($list);
+            });
+            $('#pgn-notes-status').text('');
+        }
+
+        function setModalColor(color) {
+            currentNoteColor = color;
+            $('.color-sw').removeClass('sel');
+            $('.color-sw[data-color="'+color+'"]').addClass('sel');
+        }
+
+        function openNoteModal(note) {
+            note = note || null;
+            currentNoteId = note ? note.id : null;
+            setModalColor(note ? (note.color || '#d4a800') : '#d4a800');
+            $('#note-modal-title-input').val(note ? note.titulo : '');
+            document.getElementById('note-editor').innerHTML = note ? (note.nota || '') : '';
+            $('#note-modal-header-title').text(note ? 'Editar nota' : 'Nueva nota');
+            $('#note-modal').addClass('open');
+            setTimeout(function(){ $('#note-modal-title-input').focus(); }, 60);
+        }
+
+        $('#pgn-add-note-btn').on('click', function(){ openNoteModal(); });
+
+        $('#pgn-notes-list').on('click', '.pgn-note-card-item', function(e) {
+            if ($(e.target).is('.pgn-note-card-del')) return;
+            const id  = +$(this).data('id');
+            const idx = pgnCurrentGame;
+            const note = (currentNotes[idx] || []).find(function(n){ return n.id === id; });
+            if (note) openNoteModal(note);
+        });
+
+        $('#pgn-notes-list').on('click', '.pgn-note-card-del', function(e) {
+            e.stopPropagation();
+            const id  = +$(this).data('id');
+            const idx = pgnCurrentGame;
+            fetch('/api/notas/'+id, { method: 'DELETE' })
+            .then(function(){
+                currentNotes[idx] = (currentNotes[idx] || []).filter(function(n){ return n.id !== id; });
+                renderNoteCards(idx);
+            });
+        });
+
+        $('#note-color-picker').on('click', '.color-sw', function() {
+            setModalColor($(this).data('color'));
+        });
+
+        $('#note-editor-toolbar').on('mousedown', '.tb[data-cmd]', function(e) {
+            e.preventDefault();
+            document.execCommand($(this).data('cmd'), false, null);
+            updateToolbar();
+        });
+        $('#tb-heading').on('mousedown', function(e) {
+            e.preventDefault();
+            const sel = window.getSelection();
+            const inH3 = sel.rangeCount && $(sel.getRangeAt(0).commonAncestorContainer).closest('h3').length;
+            document.execCommand('formatBlock', false, inH3 ? 'p' : 'h3');
+            updateToolbar();
+        });
+        $('#tb-highlight').on('mousedown', function(e) {
+            e.preventDefault();
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) return;
+            try { sel.getRangeAt(0).surroundContents(document.createElement('mark')); } catch(err) {}
+            updateToolbar();
+        });
+        $('#tb-indent').on('mousedown',  function(e){ e.preventDefault(); document.execCommand('indent',  false, null); });
+        $('#tb-outdent').on('mousedown', function(e){ e.preventDefault(); document.execCommand('outdent', false, null); });
+
+        function updateToolbar() {
+            ['bold','italic','underline','strikeThrough'].forEach(function(cmd){
+                $('.tb[data-cmd="'+cmd+'"]').toggleClass('on', document.queryCommandState(cmd));
+            });
+        }
+        $('#note-editor').on('keyup mouseup', updateToolbar);
+        $('#note-modal-title-input').on('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); $('#note-editor').focus(); }
+        });
+
+        $('#note-modal-save-btn').on('click', function() {
+            const titulo = $('#note-modal-title-input').val().trim();
+            const nota   = document.getElementById('note-editor').innerHTML.trim();
+            const idx    = pgnCurrentGame;
+            if (!titulo && !nota) { $('#note-modal').removeClass('open'); return; }
+            const payload = { titulo: titulo, color: currentNoteColor, nota: nota };
+            const isNew   = currentNoteId === null;
+            const url     = isNew ? '/api/notas' : '/api/notas/'+currentNoteId;
+            const method  = isNew ? 'POST' : 'PUT';
+            if (isNew) { payload.leccion_id = notesLeccionId; payload.exercise_index = idx; }
+            fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(function(r){ return r.json(); })
+            .then(function(res) {
+                if (isNew) {
+                    if (!currentNotes[idx]) currentNotes[idx] = [];
+                    currentNotes[idx].push({ id: res.id, titulo: titulo, color: currentNoteColor, nota: nota });
+                } else {
+                    const list = currentNotes[idx] || [];
+                    const i = list.findIndex(function(n){ return n.id === currentNoteId; });
+                    if (i !== -1) list[i] = { id: currentNoteId, titulo: titulo, color: currentNoteColor, nota: nota };
+                }
+                renderNoteCards(idx);
+                $('#note-modal').removeClass('open');
+                $('#pgn-notes-status').text('✓ Guardado');
+                setTimeout(function(){ $('#pgn-notes-status').text(''); }, 2000);
+            })
+            .catch(function(){ $('#pgn-notes-status').text('✗ Error'); });
+        });
+
+        $('#note-modal-x, #note-modal-cancel-btn').on('click', function(){ $('#note-modal').removeClass('open'); });
+        $('#note-modal').on('click', function(e) { if (e.target === this) $(this).removeClass('open'); });
+        $('#note-modal-box').on('click', function(e){ e.stopPropagation(); });
 
         $('#btn-back-topics').click(() => {
             if      (navLevel === 'playing')     showExercises();
@@ -3019,6 +2541,7 @@
             renderMoveList();
             updatePgnBoard();
             showFeedback('waiting', '♟ Tu turno — mueve una pieza');
+            renderNoteCards(idx);
         }
 
         // --- Move list rendering ---
@@ -3062,6 +2585,46 @@
         }
 
         // --- Board: interactive training ---
+        let selectedPgnSquare = null;
+
+        function clearPgnSelection() {
+            selectedPgnSquare = null;
+            $('#pgn-board .square-55d63').removeClass('highlight-selected');
+        }
+
+        function onPgnSquareClick(square, piece) {
+            if (!pgnPositions.length) return;
+
+            const currentFen = pgnPositions[pgnIndex].fen;
+            const temp = new Chess(currentFen);
+            const currentTurn = temp.turn();
+            const isOwnPiece = piece && piece[0].toLowerCase() === currentTurn;
+
+            if (selectedPgnSquare === null) {
+                if (!isOwnPiece) return;
+                selectedPgnSquare = square;
+                $(`#pgn-board .square-${square}`).addClass('highlight-selected');
+                return;
+            }
+
+            if (square === selectedPgnSquare) {
+                clearPgnSelection();
+                return;
+            }
+
+            if (isOwnPiece) {
+                clearPgnSelection();
+                selectedPgnSquare = square;
+                $(`#pgn-board .square-${square}`).addClass('highlight-selected');
+                return;
+            }
+
+            const result = onPgnDrop(selectedPgnSquare, square);
+            clearPgnSelection();
+            if (result === 'snapback') return;
+            onPgnSnapEnd();
+        }
+
         function initPgnBoard() {
             if (pgnBoardInstance) return;
             pgnBoardInstance = Chessboard('pgn-board', {
@@ -3069,8 +2632,10 @@
                 draggable: true,
                 pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
                 onDrop: onPgnDrop,
-                onSnapEnd: onPgnSnapEnd
+                onSnapEnd: onPgnSnapEnd,
+                onSquareClick: onPgnSquareClick
             });
+            initTouchSupport('pgn-board', () => pgnBoardInstance.position(), onPgnSquareClick);
         }
 
         function onPgnDrop(source, target) {
@@ -3187,6 +2752,219 @@
             }
         });
     });
+
+    // =====================================================================
+    // CURSOS (cursara DB)
+    // =====================================================================
+    (function() {
+        let coursesBoardInstance = null;
+        let coursesPositions     = [];
+        let coursesIndex         = 0;
+        let coursesNavLevel      = 'list'; // 'list' | 'detail'
+        let cursosCache          = null;
+
+        const LEVEL_LABEL = { beginner:'Principiante', intermediate:'Intermedio', advanced:'Avanzado' };
+        const TIPO_ICON   = { video:'▶', pgn:'♟', pdf:'📄', image:'🖼', quiz:'❓', ejercicio:'✏️', file:'📎', proyecto:'🏗' };
+
+        function loadCursosSection() {
+            if (coursesNavLevel === 'detail') return; // ya navegando, no resetear
+            showCursosList();
+        }
+
+        function showCursosList() {
+            coursesNavLevel = 'list';
+            $('#courses-list-panel').show();
+            $('#courses-detail-panel').hide();
+            $('#courses-board-wrap').hide();
+            $('#courses-lesson-content').empty();
+            $('#courses-header-title').text('Cursos');
+            $('#btn-courses-back').hide();
+
+            if (cursosCache) { renderCursosList(cursosCache); return; }
+
+            $('#courses-list').html('<div style="color:#aaa;text-align:center;margin-top:30px;">Cargando cursos…</div>');
+            fetch('/api/catalogo')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) throw new Error(data.error);
+                    cursosCache = data;
+                    renderCursosList(data);
+                })
+                .catch(e => {
+                    $('#courses-list').html(`<div style="color:#e17055;padding:12px;">Error: ${e.message}</div>`);
+                });
+        }
+
+        function renderCursosList(cursos) {
+            const $list = $('#courses-list').empty();
+            if (!cursos.length) {
+                $list.html('<div style="color:#aaa;text-align:center;margin-top:30px;">No hay cursos publicados.</div>');
+                return;
+            }
+            cursos.forEach(c => {
+                const secs = c.secciones ? c.secciones.length : 0;
+                const lecs = c.secciones ? c.secciones.reduce((t, s) => t + s.lecciones.length, 0) : 0;
+                $(`<div class="course-card">
+                    <div class="course-icon"><i class="fas fa-chess"></i></div>
+                    <div>
+                        <div class="course-name">${c.nombre}</div>
+                        <div class="course-desc">${c.descripcion || ''}</div>
+                        <div class="course-meta">${[secs ? secs+' secciones' : '', lecs ? lecs+' lecciones' : ''].filter(Boolean).join(' · ')}</div>
+                    </div>
+                </div>`).on('click', () => showCursoDetail(c)).appendTo($list);
+            });
+        }
+
+        function showCursoDetail(curso) {
+            coursesNavLevel = 'detail';
+            $('#courses-list-panel').hide();
+            $('#courses-detail-panel').show();
+            $('#courses-header-title').text(curso.nombre);
+            $('#btn-courses-back').show();
+            $('#courses-board-wrap').hide();
+            $('#courses-lesson-content').empty();
+            renderSecciones(curso.secciones || []);
+        }
+
+        function renderSecciones(secciones) {
+            const $list = $('#courses-sections-list').empty();
+            if (!secciones.length) {
+                $list.html('<div style="color:#aaa;text-align:center;padding:20px;">Este curso aun no tiene contenido.</div>');
+                return;
+            }
+            secciones.forEach(sec => {
+                const $sec = $(`<div style="margin-bottom:14px;">
+                    <div style="font-weight:600;color:var(--accent);font-size:0.85rem;margin-bottom:8px;padding:6px 8px;background:rgba(255,255,255,0.05);border-radius:6px;">
+                        <i class="fas fa-layer-group" style="margin-right:6px;"></i>${sec.nombre}
+                        <span style="float:right;font-weight:400;color:#aaa;">${sec.lecciones.length} lec.</span>
+                    </div>
+                    <div class="lecciones-list"></div>
+                </div>`);
+
+                const $lecs = $sec.find('.lecciones-list');
+                sec.lecciones.forEach(lec => {
+                    const icon = TIPO_ICON[lec.api] || '•';
+                    $(`<div class="topic-card" style="padding:8px 12px;display:flex;align-items:center;gap:10px;">
+                        <span style="font-size:1rem;min-width:20px;text-align:center;">${icon}</span>
+                        <div style="flex:1;">
+                            <div style="font-size:0.85rem;">${lec.titulo}</div>
+                            <div style="font-size:0.72rem;color:#aaa;">${lec.api}${lec.subtitulo ? ' · '+lec.subtitulo : ''}</div>
+                        </div>
+                    </div>`).on('click', () => showLeccion(lec)).appendTo($lecs);
+                });
+                $list.append($sec);
+            });
+        }
+
+        function showLeccion(lec) {
+            $('#courses-lesson-content').empty();
+            $('#courses-board-wrap').hide();
+
+            // Video embebido (Drive preview o YouTube)
+            if (lec.video_url) {
+                let src = lec.video_url;
+                if (src.includes('watch?v=')) src = src.replace('watch?v=', 'embed/');
+                $('#courses-lesson-content').html(`
+                    <div style="font-weight:600;margin-bottom:10px;font-size:0.95rem;">${lec.titulo}</div>
+                    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;">
+                        <iframe src="${src}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
+                            allowfullscreen allow="autoplay"></iframe>
+                    </div>
+                `);
+                return;
+            }
+
+            // Archivo en Drive (pdf, file, image, pgn)
+            if (lec.drive_file_id) {
+                const viewUrl   = `https://drive.google.com/file/d/${lec.drive_file_id}/view`;
+                const previewUrl = `https://drive.google.com/file/d/${lec.drive_file_id}/preview`;
+                const isPdf = lec.api === 'pdf';
+                $('#courses-lesson-content').html(`
+                    <div style="font-weight:600;margin-bottom:10px;font-size:0.95rem;">${lec.titulo}</div>
+                    ${isPdf ? `<iframe src="${previewUrl}" style="width:100%;height:500px;border:0;border-radius:8px;"></iframe>` : ''}
+                    <a href="${viewUrl}" target="_blank"
+                       style="display:inline-block;margin-top:10px;background:var(--accent);color:#fff;
+                              padding:8px 16px;border-radius:8px;text-decoration:none;font-size:0.85rem;">
+                        <i class="fas fa-external-link-alt" style="margin-right:6px;"></i>Abrir en Drive
+                    </a>
+                `);
+                return;
+            }
+
+            $('#courses-lesson-content').html(`
+                <div style="font-weight:600;margin-bottom:10px;font-size:0.95rem;">${lec.titulo}</div>
+                <div style="color:#777;font-size:0.85rem;">Sin contenido disponible.</div>
+            `);
+        }
+
+        function loadPgnLesson(pgn, titulo) {
+            const g = new Chess();
+            if (!g.load_pgn(pgn)) {
+                $('#courses-lesson-content').html('<div style="color:#e17055;">PGN inválido.</div>');
+                return;
+            }
+            const history = g.history();
+            const replay  = new Chess();
+            coursesPositions = [{ fen: replay.fen(), label: 'Inicio' }];
+            history.forEach((san, i) => {
+                const color   = replay.turn();
+                const moveNum = Math.floor(i / 2) + 1;
+                replay.move(san);
+                coursesPositions.push({ fen: replay.fen(), label: color === 'w' ? `${moveNum}. ${san}` : `${moveNum}… ${san}` });
+            });
+            coursesIndex = 0;
+
+            if (!coursesBoardInstance) {
+                coursesBoardInstance = Chessboard('courses-board', {
+                    position: coursesPositions[0].fen,
+                    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+                });
+            } else {
+                coursesBoardInstance.position(coursesPositions[0].fen, false);
+            }
+
+            $('#courses-board-wrap').show();
+            $('#courses-lesson-content').html(`<div style="font-weight:600;padding:8px 0 4px;font-size:0.9rem;">${titulo}</div>`);
+            updateCoursesBoardStatus();
+        }
+
+        function updateCoursesBoardStatus() {
+            const pos = coursesPositions[coursesIndex];
+            $('#courses-board-status').text(`${pos.label}  (${coursesIndex}/${coursesPositions.length - 1})`);
+        }
+
+        $('#courses-first').on('click', () => {
+            if (!coursesPositions.length) return;
+            coursesIndex = 0;
+            coursesBoardInstance.position(coursesPositions[0].fen, false);
+            updateCoursesBoardStatus();
+        });
+        $('#courses-prev').on('click', () => {
+            if (coursesIndex <= 0) return;
+            coursesIndex--;
+            coursesBoardInstance.position(coursesPositions[coursesIndex].fen, false);
+            updateCoursesBoardStatus();
+        });
+        $('#courses-next').on('click', () => {
+            if (coursesIndex >= coursesPositions.length - 1) return;
+            coursesIndex++;
+            coursesBoardInstance.position(coursesPositions[coursesIndex].fen, false);
+            updateCoursesBoardStatus();
+        });
+        $('#courses-last').on('click', () => {
+            if (!coursesPositions.length) return;
+            coursesIndex = coursesPositions.length - 1;
+            coursesBoardInstance.position(coursesPositions[coursesIndex].fen, false);
+            updateCoursesBoardStatus();
+        });
+
+        $('#btn-courses-back').on('click', () => {
+            coursesNavLevel = 'list';
+            showCursosList();
+        });
+
+        window.loadCursosSection = loadCursosSection;
+    }());
 </script>
 
 </body>

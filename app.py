@@ -7,6 +7,7 @@ import io
 import base64
 import chess
 import PIL.Image
+import mysql.connector
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from google import genai
@@ -374,6 +375,184 @@ Sé concreto: usa coordenadas de jugadas, explica con lenguaje simple para 700 E
         return jsonify({"errors": str(e)}), 500
 
 
+def get_db():
+    return mysql.connector.connect(host='localhost', user='root', password='', database='chess_enigma')
+
+@app.route('/api/catalogo')
+def api_catalogo():
+    try:
+        conn = get_db()
+        cur  = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, nombre, descripcion FROM cursos WHERE tipo='cursara' ORDER BY orden")
+        cursos = cur.fetchall()
+        cur.execute("""
+            SELECT id, curso_id, nombre FROM secciones
+            WHERE curso_id IN (SELECT id FROM cursos WHERE tipo='cursara') ORDER BY orden
+        """)
+        secciones = cur.fetchall()
+        cur.execute("""
+            SELECT id, seccion_id, titulo, subtitulo, api, drive_file_id, video_url FROM lecciones
+            WHERE seccion_id IN (
+                SELECT id FROM secciones WHERE curso_id IN (SELECT id FROM cursos WHERE tipo='cursara')
+            ) ORDER BY orden
+        """)
+        lecciones = cur.fetchall()
+        cur.close(); conn.close()
+
+        lecs_by_sec = {}
+        for l in lecciones:
+            lecs_by_sec.setdefault(l['seccion_id'], []).append({
+                'id': l['id'], 'titulo': l['titulo'], 'subtitulo': l['subtitulo'],
+                'api': l['api'], 'drive_file_id': l['drive_file_id'], 'video_url': l['video_url']
+            })
+        secs_by_curso = {}
+        for s in secciones:
+            secs_by_curso.setdefault(s['curso_id'], []).append({
+                'id': s['id'], 'nombre': s['nombre'],
+                'lecciones': lecs_by_sec.get(s['id'], [])
+            })
+        result = [{'id': c['id'], 'nombre': c['nombre'], 'descripcion': c['descripcion'],
+                   'secciones': secs_by_curso.get(c['id'], [])} for c in cursos]
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/notas/<leccion_id>')
+def get_notas(leccion_id):
+    try:
+        conn = get_db()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, exercise_index, titulo, color, nota FROM notas WHERE leccion_id = %s ORDER BY id", (leccion_id,))
+        rows = cur.fetchall()
+        cur.close(); conn.close()
+        result = {}
+        for r in rows:
+            idx = r['exercise_index']
+            result.setdefault(idx, []).append({'id': r['id'], 'titulo': r['titulo'], 'color': r['color'], 'nota': r['nota']})
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+@app.route('/api/notas', methods=['POST'])
+def create_nota():
+    try:
+        data           = request.json
+        leccion_id     = data.get('leccion_id')
+        exercise_index = data.get('exercise_index')
+        titulo         = data.get('titulo', '').strip()
+        color          = data.get('color', '#d4a800')
+        nota           = data.get('nota', '').strip()
+        if not leccion_id or exercise_index is None:
+            return jsonify({'error': 'Faltan campos'}), 400
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("INSERT INTO notas (leccion_id, exercise_index, titulo, color, nota) VALUES (%s,%s,%s,%s,%s)",
+                    (leccion_id, exercise_index, titulo, color, nota))
+        conn.commit()
+        new_id = cur.lastrowid
+        cur.close(); conn.close()
+        return jsonify({'ok': True, 'id': new_id})
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+@app.route('/api/notas/<int:note_id>', methods=['PUT'])
+def update_nota(note_id):
+    try:
+        data   = request.json
+        titulo = data.get('titulo', '').strip()
+        color  = data.get('color', '#d4a800')
+        nota   = data.get('nota', '').strip()
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("UPDATE notas SET titulo=%s, color=%s, nota=%s, updated_at=CURRENT_TIMESTAMP WHERE id=%s",
+                    (titulo, color, nota, note_id))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+@app.route('/api/notas/<int:note_id>', methods=['DELETE'])
+def delete_nota(note_id):
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("DELETE FROM notas WHERE id=%s", (note_id,))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+@app.route('/api/cursos')
+def api_cursos():
+    try:
+        conn = get_db()
+        cur = conn.cursor(dictionary=True)
+
+        cur.execute("SELECT id, nombre, descripcion FROM cursos ORDER BY orden")
+        cursos = cur.fetchall()
+
+        cur.execute("SELECT id, curso_id, nombre FROM secciones ORDER BY orden")
+        secciones = cur.fetchall()
+
+        cur.execute("SELECT id, seccion_id, titulo, subtitulo, api, study_id, chapter_index FROM lecciones ORDER BY orden")
+        lecciones = cur.fetchall()
+
+        cur.execute("SELECT id, leccion_id, study_id, api, titulo FROM sublecciones ORDER BY orden")
+        sublecciones = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        subs_by_lec = {}
+        for s in sublecciones:
+            subs_by_lec.setdefault(s['leccion_id'], []).append({
+                'id': s['id'],
+                'studyId': s['study_id'],
+                'api': s['api'],
+                'titulo': s['titulo'],
+            })
+
+        lecs_by_sec = {}
+        for l in lecciones:
+            obj = {'id': l['id'], 'titulo': l['titulo']}
+            if l['subtitulo']:
+                obj['subtitulo'] = l['subtitulo']
+            if l['api']:
+                obj['api'] = l['api']
+            if l['study_id']:
+                obj['studyId'] = l['study_id']
+            if l['chapter_index'] is not None:
+                obj['chapterIndex'] = l['chapter_index']
+            subs = subs_by_lec.get(l['id'])
+            if subs:
+                obj['sublecciones'] = subs
+            lecs_by_sec.setdefault(l['seccion_id'], []).append(obj)
+
+        secs_by_curso = {}
+        for s in secciones:
+            secs_by_curso.setdefault(s['curso_id'], []).append({
+                'id': s['id'],
+                'nombre': s['nombre'],
+                'lecciones': lecs_by_sec.get(s['id'], []),
+            })
+
+        result = []
+        for c in cursos:
+            result.append({
+                'id': c['id'],
+                'nombre': c['nombre'],
+                'descripcion': c['descripcion'] or '',
+                'secciones': secs_by_curso.get(c['id'], []),
+            })
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+
 @app.route('/proxy/study/<study_id>')
 def proxy_study(study_id):
     import urllib.request
@@ -392,6 +571,15 @@ def proxy_study_prod(study_id):
         data = json.loads(resp.read())
     return jsonify(data)
 
+@app.route('/proxy/lichess-study/<study_id>')
+def proxy_lichess_study(study_id):
+    import urllib.request
+    url = f'https://lichess.org/study/{study_id}.pgn'
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/x-chess-pgn'})
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        pgn = resp.read().decode('utf-8')
+    return jsonify({'data': {'pgn': pgn}})
+
 @app.route('/proxy/lichess-chapter/<study_id>/<chapter_id>')
 def proxy_lichess_chapter(study_id, chapter_id):
     import urllib.request
@@ -404,4 +592,4 @@ def proxy_lichess_chapter(study_id, chapter_id):
 
 if __name__ == '__main__':
     print("Servidor de Ajedrez con Gemini iniciado en http://localhost:5000")
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', debug=True, port=5000)
