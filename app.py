@@ -314,6 +314,94 @@ def chat():
     except Exception as e:
         return jsonify({"errors": str(e)}), 500
 
+@app.route('/coach-report', methods=['POST'])
+def coach_report():
+    data = request.json
+    fen          = data.get('fen', '')
+    analysis     = data.get('analysis')
+    moves        = data.get('moves', [])
+    stats        = data.get('stats', {})
+    api_key      = data.get('api_key') or os.environ.get('GEMINI_API_KEY')
+
+    if not api_key:
+        return jsonify({"errors": "API Key de Gemini no configurada"}), 400
+
+    w = stats.get('w', {}); b = stats.get('b', {})
+    w_avg = (w.get('totalLoss', 0) / w['moves']) if w.get('moves') else 0
+    b_avg = (b.get('totalLoss', 0) / b['moves']) if b.get('moves') else 0
+
+    moves_text = ', '.join(
+        f"{m['notation']}({'★' if m['loss']==0 else '!!' if m['loss']<=10 else '?!' if m['loss']<=100 else '?' if m['loss']<=200 else '??'})"
+        for m in moves
+    ) if moves else 'Sin jugadas registradas'
+
+    prompt = f"""Eres un entrenador de ajedrez analizando la sesión de un jugador de ~700 ELO.
+
+POSICIÓN ACTUAL (FEN): {fen}
+ANÁLISIS STOCKFISH: mejor jugada={analysis.get('bestmove','?') if analysis else '?'}, evaluación={analysis.get('score_cp',0)/100 if analysis else 0:+.2f}, profundidad={analysis.get('depth',0) if analysis else 0}
+JUGADAS REGISTRADAS: {moves_text}
+ESTADÍSTICAS:
+  Blancas — {w.get('moves',0)} jugadas, pérdida promedio {w_avg:.0f} cp
+  Negras  — {b.get('moves',0)} jugadas, pérdida promedio {b_avg:.0f} cp
+
+Genera un INFORME DE ENTRENADOR detallado en español. Usa EXACTAMENTE estas secciones con estos encabezados:
+
+## EVALUACIÓN GENERAL
+## JUGADAS DESTACADAS
+## ERRORES COMETIDOS
+## PATRONES DETECTADOS
+## PLAN DE MEJORA
+
+Sé concreto: usa coordenadas de jugadas, explica con lenguaje simple para 700 ELO. Máximo 5 puntos por sección."""
+
+    try:
+        client = genai.Client(api_key=api_key)
+        try:
+            cfg = types.GenerateContentConfig(
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+                temperature=0.7
+            )
+        except Exception:
+            cfg = types.GenerateContentConfig(temperature=0.7)
+
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[types.Content(role='user', parts=[types.Part(text=prompt)])],
+            config=cfg
+        )
+        return jsonify({"report": response.text})
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+
+@app.route('/proxy/study/<study_id>')
+def proxy_study(study_id):
+    import urllib.request
+    url = f'https://test.chessenigma.com/api/v1/studies/{study_id}'
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read())
+    return jsonify(data)
+
+@app.route('/proxy/study-prod/<study_id>')
+def proxy_study_prod(study_id):
+    import urllib.request
+    url = f'https://api.chessenigma.com/api/v1/studies/{study_id}'
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json'})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        data = json.loads(resp.read())
+    return jsonify(data)
+
+@app.route('/proxy/lichess-chapter/<study_id>/<chapter_id>')
+def proxy_lichess_chapter(study_id, chapter_id):
+    import urllib.request
+    url = f'https://lichess.org/study/{study_id}/{chapter_id}.pgn'
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/x-chess-pgn'})
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        pgn = resp.read().decode('utf-8')
+    return jsonify({'data': {'pgn': pgn}})
+
+
 if __name__ == '__main__':
     print("Servidor de Ajedrez con Gemini iniciado en http://localhost:5000")
     app.run(debug=True, port=5000)
