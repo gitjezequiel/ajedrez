@@ -378,6 +378,37 @@ Sé concreto: usa coordenadas de jugadas, explica con lenguaje simple para 700 E
 def get_db():
     return mysql.connector.connect(host='localhost', user='root', password='', database='chess_enigma')
 
+@app.route('/api/progreso')
+def get_progreso():
+    try:
+        conn = get_db()
+        cur  = conn.cursor(dictionary=True)
+        cur.execute("SELECT leccion_id FROM progreso WHERE visto = 1")
+        ids  = [r['leccion_id'] for r in cur.fetchall()]
+        cur.close(); conn.close()
+        return jsonify(ids)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/progreso/<leccion_id>', methods=['POST'])
+def toggle_progreso(leccion_id):
+    try:
+        conn = get_db()
+        cur  = conn.cursor(dictionary=True)
+        cur.execute("SELECT visto FROM progreso WHERE leccion_id = %s", (leccion_id,))
+        row  = cur.fetchone()
+        if row:
+            nuevo = 0 if row['visto'] else 1
+            cur.execute("UPDATE progreso SET visto = %s WHERE leccion_id = %s", (nuevo, leccion_id))
+        else:
+            nuevo = 1
+            cur.execute("INSERT INTO progreso (leccion_id, visto) VALUES (%s, 1)", (leccion_id,))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'visto': bool(nuevo)})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/catalogo')
 def api_catalogo():
     try:

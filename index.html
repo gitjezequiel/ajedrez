@@ -2760,15 +2760,22 @@
         let coursesBoardInstance = null;
         let coursesPositions     = [];
         let coursesIndex         = 0;
-        let coursesNavLevel      = 'list'; // 'list' | 'detail'
+        let coursesNavLevel      = 'list';
         let cursosCache          = null;
+        let progresoSet          = new Set(); // IDs de lecciones vistas
+        let notaActual           = null;      // { id, leccion_id } o null
+        let notaLeccionId        = null;
 
         const LEVEL_LABEL = { beginner:'Principiante', intermediate:'Intermedio', advanced:'Avanzado' };
         const TIPO_ICON   = { video:'▶', pgn:'♟', pdf:'📄', image:'🖼', quiz:'❓', ejercicio:'✏️', file:'📎', proyecto:'🏗' };
 
         function loadCursosSection() {
-            if (coursesNavLevel === 'detail') return; // ya navegando, no resetear
-            showCursosList();
+            if (coursesNavLevel === 'detail') return;
+            fetch('/api/progreso')
+                .then(r => r.json())
+                .then(ids => { progresoSet = new Set(ids); })
+                .catch(() => {})
+                .finally(() => showCursosList());
         }
 
         function showCursosList() {
@@ -2833,27 +2840,65 @@
                 return;
             }
             secciones.forEach(sec => {
+                const vistas  = sec.lecciones.filter(l => progresoSet.has(l.id)).length;
                 const $sec = $(`<div style="margin-bottom:14px;">
                     <div style="font-weight:600;color:var(--accent);font-size:0.85rem;margin-bottom:8px;padding:6px 8px;background:rgba(255,255,255,0.05);border-radius:6px;">
                         <i class="fas fa-layer-group" style="margin-right:6px;"></i>${sec.nombre}
-                        <span style="float:right;font-weight:400;color:#aaa;">${sec.lecciones.length} lec.</span>
+                        <span style="float:right;font-weight:400;color:#aaa;">${vistas}/${sec.lecciones.length}</span>
                     </div>
                     <div class="lecciones-list"></div>
                 </div>`);
 
                 const $lecs = $sec.find('.lecciones-list');
                 sec.lecciones.forEach(lec => {
-                    const icon = TIPO_ICON[lec.api] || '•';
-                    $(`<div class="topic-card" style="padding:8px 12px;display:flex;align-items:center;gap:10px;">
+                    const icon  = TIPO_ICON[lec.api] || '•';
+                    const visto = progresoSet.has(lec.id);
+                    const $card = $(`<div class="topic-card lec-card" data-id="${lec.id}"
+                        style="padding:8px 12px;display:flex;align-items:center;gap:10px;${visto ? 'opacity:0.6;' : ''}">
                         <span style="font-size:1rem;min-width:20px;text-align:center;">${icon}</span>
-                        <div style="flex:1;">
+                        <div style="flex:1;cursor:pointer;" class="lec-title-area">
                             <div style="font-size:0.85rem;">${lec.titulo}</div>
                             <div style="font-size:0.72rem;color:#aaa;">${lec.api}${lec.subtitulo ? ' · '+lec.subtitulo : ''}</div>
                         </div>
-                    </div>`).on('click', () => showLeccion(lec)).appendTo($lecs);
+                        <button class="btn-visto" title="${visto ? 'Marcar como no visto' : 'Marcar como visto'}"
+                            style="background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 4px;color:${visto ? '#00b894' : '#555'};">
+                            ${visto ? '✓' : '○'}
+                        </button>
+                    </div>`);
+
+                    $card.find('.lec-title-area').on('click', () => showLeccion(lec));
+                    $card.find('.btn-visto').on('click', (e) => {
+                        e.stopPropagation();
+                        toggleVisto(lec.id, $card);
+                    });
+                    $lecs.append($card);
                 });
                 $list.append($sec);
             });
+        }
+
+        function toggleVisto(leccionId, $card) {
+            fetch(`/api/progreso/${leccionId}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) return;
+                    const $btn = $card.find('.btn-visto');
+                    if (data.visto) {
+                        progresoSet.add(leccionId);
+                        $btn.text('✓').css('color', '#00b894').attr('title', 'Marcar como no visto');
+                        $card.css('opacity', '0.6');
+                    } else {
+                        progresoSet.delete(leccionId);
+                        $btn.text('○').css('color', '#555').attr('title', 'Marcar como visto');
+                        $card.css('opacity', '1');
+                    }
+                    // Actualizar contador de sección
+                    const $secHeader = $card.closest('div[style*="margin-bottom"]').find('[style*="border-radius:6px"]').first();
+                    const $lecs      = $card.siblings('.lec-card').addBack();
+                    const vistas     = $lecs.filter((_, el) => progresoSet.has($(el).data('id'))).length;
+                    const total      = $lecs.length;
+                    $secHeader.find('span').text(`${vistas}/${total}`);
+                });
         }
 
         function showLeccion(lec) {
@@ -2871,12 +2916,13 @@
                             allowfullscreen allow="autoplay"></iframe>
                     </div>
                 `);
+                appendNotasUI(lec.id);
                 return;
             }
 
             // Archivo en Drive (pdf, file, image, pgn)
             if (lec.drive_file_id) {
-                const viewUrl   = `https://drive.google.com/file/d/${lec.drive_file_id}/view`;
+                const viewUrl    = `https://drive.google.com/file/d/${lec.drive_file_id}/view`;
                 const previewUrl = `https://drive.google.com/file/d/${lec.drive_file_id}/preview`;
                 const isPdf = lec.api === 'pdf';
                 $('#courses-lesson-content').html(`
@@ -2888,6 +2934,7 @@
                         <i class="fas fa-external-link-alt" style="margin-right:6px;"></i>Abrir en Drive
                     </a>
                 `);
+                appendNotasUI(lec.id);
                 return;
             }
 
@@ -2895,6 +2942,78 @@
                 <div style="font-weight:600;margin-bottom:10px;font-size:0.95rem;">${lec.titulo}</div>
                 <div style="color:#777;font-size:0.85rem;">Sin contenido disponible.</div>
             `);
+            appendNotasUI(lec.id);
+        }
+
+        function appendNotasUI(leccionId) {
+            notaLeccionId = leccionId;
+            notaActual    = null;
+            const $ui = $(`<div id="curso-nota-area" style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">
+                <div style="font-size:0.8rem;color:#aaa;margin-bottom:6px;"><i class="fas fa-sticky-note" style="margin-right:5px;"></i>Nota personal</div>
+                <textarea id="curso-nota-text" placeholder="Escribe tu nota sobre esta leccion…"
+                    style="width:100%;box-sizing:border-box;background:#1a1a2e;color:#eee;border:1px solid rgba(255,255,255,0.12);
+                           border-radius:8px;padding:8px 10px;font-size:0.83rem;resize:vertical;min-height:80px;outline:none;"></textarea>
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                    <button id="curso-nota-save" style="flex:1;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px;font-size:0.82rem;cursor:pointer;">
+                        <i class="fas fa-save" style="margin-right:4px;"></i>Guardar nota
+                    </button>
+                    <button id="curso-nota-clear" style="background:rgba(255,255,255,0.07);color:#aaa;border:none;border-radius:6px;padding:6px 10px;font-size:0.82rem;cursor:pointer;"
+                        title="Borrar nota">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div id="curso-nota-status" style="font-size:0.75rem;color:#aaa;margin-top:4px;min-height:14px;"></div>
+            </div>`);
+            $('#courses-lesson-content').append($ui);
+
+            // Cargar nota existente
+            fetch(`/api/notas/${leccionId}`)
+                .then(r => r.json())
+                .then(data => {
+                    const notas = Object.values(data);
+                    if (notas.length) {
+                        notaActual = notas[0];
+                        $('#curso-nota-text').val(notaActual.nota || '');
+                    }
+                }).catch(() => {});
+
+            $('#curso-nota-save').on('click', guardarNota);
+            $('#curso-nota-clear').on('click', borrarNota);
+        }
+
+        function guardarNota() {
+            const texto = $('#curso-nota-text').val().trim();
+            const $status = $('#curso-nota-status');
+            if (notaActual) {
+                fetch(`/api/notas/${notaActual.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo: '', color: '#0984e3', nota: texto })
+                }).then(() => { $status.text('Guardado.'); setTimeout(() => $status.text(''), 2000); });
+            } else {
+                fetch('/api/notas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ leccion_id: notaLeccionId, exercise_index: 0, titulo: '', color: '#0984e3', nota: texto })
+                }).then(r => r.json())
+                  .then(d => {
+                      notaActual = { id: d.id, leccion_id: notaLeccionId, nota: texto };
+                      $status.text('Guardado.');
+                      setTimeout(() => $status.text(''), 2000);
+                  });
+            }
+        }
+
+        function borrarNota() {
+            if (!notaActual) { $('#curso-nota-text').val(''); return; }
+            if (!confirm('¿Borrar esta nota?')) return;
+            fetch(`/api/notas/${notaActual.id}`, { method: 'DELETE' })
+                .then(() => {
+                    notaActual = null;
+                    $('#curso-nota-text').val('');
+                    $('#curso-nota-status').text('Nota borrada.');
+                    setTimeout(() => $('#curso-nota-status').text(''), 2000);
+                });
         }
 
         function loadPgnLesson(pgn, titulo) {
