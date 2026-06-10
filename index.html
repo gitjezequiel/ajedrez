@@ -1385,9 +1385,16 @@
 
             <!-- Nivel 3: Vista de juego -->
             <div id="prac-playing-panel" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-                <div style="display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                <!-- Barra patrones: teoría / ejercicio -->
+                <div id="prac-mode-bar" style="display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);">
                     <button id="btn-prac-teoria" style="flex:1;padding:6px;border-radius:6px;background:#2d3436;color:#b2bec3;border:1px solid rgba(255,255,255,0.1);cursor:pointer;font-size:0.82rem;">📖 Teoría</button>
                     <button id="btn-prac-ejercicio" style="flex:1;padding:6px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:0.82rem;">⚔️ Ejercicio</button>
+                </div>
+                <!-- Barra taller: nav entre lecciones -->
+                <div id="prac-leccion-bar" style="display:none;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.08);gap:8px;">
+                    <button id="btn-prac-lec-prev" style="background:#2d3436;border:none;color:#b2bec3;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;">&#8592; Anterior</button>
+                    <span id="prac-lec-counter" style="font-size:0.8rem;color:#b2bec3;font-weight:600;"></span>
+                    <button id="btn-prac-lec-next" style="background:#2d3436;border:none;color:#b2bec3;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;">Siguiente &#8594;</button>
                 </div>
                 <div id="prac-moves-wrap" style="flex:1;overflow-y:auto;padding:12px 15px;">
                     <div id="prac-game-title" style="font-weight:600;color:#dfe6e9;margin-bottom:10px;font-size:0.9rem;"></div>
@@ -3133,6 +3140,8 @@
         const PRAC_STUDY_ID = 'uYSaJEgT';
         const PRACTICAS_SETS = [{
             id: 'mates-30',
+            tipo: 'patrones',
+            grupo: null,
             titulo: '30 Patrones de Jaque Mate',
             descripcion: 'Aprende y practica los 30 patrones de jaque mate más importantes',
             patrones: [
@@ -3167,11 +3176,26 @@
                 { num: 29, nombre: 'Triángulo',           teoria: 'jFrW3d0Y', ejercicio: 'yE9vHX4U' },
                 { num: 30, nombre: 'Vukovic',             teoria: 'IXbbaK1T', ejercicio: '8gy1Tf1v' }
             ]
-        }];
+        },
+        // ── Taller de Tácticas ──────────────────────────────────────────────
+        {
+            id: 'taller-clavadas',
+            tipo: 'taller',
+            grupo: 'Taller de Tácticas',
+            titulo: 'Clavadas',
+            descripcion: '3 estudios sobre el arte de la clavada (pin)',
+            lecciones: [
+                { num: 1, titulo: 'Ejercicio 6 — Clavada',       studyId: 'TUsg6DaQ', chapterId: 'YwFkPk8B' },
+                { num: 2, titulo: 'Ejercicios de clavada — Cap. 2', studyId: '3m8mhJQp', chapterId: 'oFs50pTU' },
+                { num: 3, titulo: 'Ejemplo de clavada',           studyId: 'QXNvS4ek', chapterId: 'lS9QQ2ou' }
+            ]
+        }
+        ];
 
-        let pracNavLevel     = 'sets';
-        let pracCurrentSet   = null;
+        let pracNavLevel      = 'sets';
+        let pracCurrentSet    = null;
         let pracCurrentPatron = null;
+        let pracCurrentLeccion = null;
         let pracCurrentMode  = 'ejercicio';
         let pracBoardInst    = null;
         let pracBoardReady   = false;
@@ -3385,18 +3409,53 @@
             clearPracAnnotations();
             if (pracBoardInst) pracBoardInst.position('start', false);
             const $list = $('#prac-sets-list').empty();
+            let lastGrupo = null;
             PRACTICAS_SETS.forEach(set => {
+                if (set.grupo && set.grupo !== lastGrupo) {
+                    lastGrupo = set.grupo;
+                    $list.append(`<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#636e72;margin:18px 0 8px;padding-left:2px;">${set.grupo}</div>`);
+                }
+                const isTaller = set.tipo === 'taller';
+                const icon     = isTaller ? '⚡' : '♚';
+                const count    = isTaller ? set.lecciones.length : set.patrones.length;
+                const countTxt = isTaller ? `${count} lecciones` : `${count} patrones`;
                 const $card = $(`<div class="topic-card" style="cursor:pointer;">
                     <div style="display:flex;align-items:center;gap:12px;">
-                        <span style="font-size:1.8rem;">♚</span>
+                        <span style="font-size:1.8rem;">${icon}</span>
                         <div style="flex:1;">
                             <div class="topic-title">${set.titulo}</div>
-                            <div class="topic-sub">${set.patrones.length} patrones · Lichess Chess-Enigma</div>
+                            <div class="topic-sub">${countTxt}</div>
                         </div>
                         <i class="fas fa-chevron-right" style="color:#636e72;"></i>
                     </div>
                 </div>`);
-                $card.on('click', () => showPracPatrones(set));
+                $card.on('click', isTaller ? () => showPracLecciones(set) : () => showPracPatrones(set));
+                $card.appendTo($list);
+            });
+        }
+
+        function showPracLecciones(set) {
+            pracNavLevel = 'patterns';
+            pracCurrentSet = set;
+            $('#prac-sets-panel').hide();
+            $('#prac-patterns-panel').show();
+            $('#prac-playing-panel').hide();
+            $('#prac-nav-bar, #prac-feedback').hide();
+            $('#prac-status').text('');
+            $('#prac-header-title').text(set.titulo);
+            $('#prac-patterns-label').text(`${set.lecciones.length} Lecciones`);
+            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> Prácticas');
+            const $list = $('#prac-patterns-list').empty();
+            set.lecciones.forEach(l => {
+                const $card = $(`<div class="exercise-card" style="cursor:pointer;">
+                    <div class="exercise-num">${l.num}</div>
+                    <div style="flex:1;">
+                        <div class="exercise-name">${l.titulo}</div>
+                        <div class="exercise-moves">Lichess · estudio ${l.studyId}</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:#636e72;margin-left:auto;"></i>
+                </div>`);
+                $card.on('click', () => openPracLeccion(l));
                 $card.appendTo($list);
             });
         }
@@ -3430,14 +3489,36 @@
         function openPracPatron(patron) {
             pracNavLevel = 'playing';
             pracCurrentPatron = patron;
+            pracCurrentLeccion = null;
             $('#prac-sets-panel, #prac-patterns-panel').hide();
             $('#prac-playing-panel').css('display', 'flex');
+            $('#prac-mode-bar').show();
+            $('#prac-leccion-bar').hide();
             $('#prac-header-title').text(patron.nombre);
             $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
             loadPracChapter(patron.ejercicio, 'ejercicio');
         }
 
-        function loadPracChapter(chapterId, mode) {
+        function openPracLeccion(leccion) {
+            pracNavLevel = 'playing';
+            pracCurrentLeccion = leccion;
+            pracCurrentPatron = null;
+            const lecciones = pracCurrentSet.lecciones;
+            const idx = lecciones.indexOf(leccion);
+            $('#prac-sets-panel, #prac-patterns-panel').hide();
+            $('#prac-playing-panel').css('display', 'flex');
+            $('#prac-mode-bar').hide();
+            $('#prac-leccion-bar').css('display', 'flex');
+            $('#prac-lec-counter').text(`Lección ${idx + 1} / ${lecciones.length}`);
+            $('#btn-prac-lec-prev').prop('disabled', idx === 0).css('opacity', idx === 0 ? 0.35 : 1);
+            $('#btn-prac-lec-next').prop('disabled', idx === lecciones.length - 1).css('opacity', idx === lecciones.length - 1 ? 0.35 : 1);
+            $('#prac-header-title').text(leccion.titulo);
+            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
+            loadPracChapter(leccion.chapterId, 'teoria', leccion.studyId);
+        }
+
+        function loadPracChapter(chapterId, mode, studyId) {
+            const sid = studyId || PRAC_STUDY_ID;
             pracCurrentMode = mode;
             const isEj = mode === 'ejercicio';
             $('#btn-prac-ejercicio').css({ background: isEj ? 'var(--accent)' : '#2d3436', color: isEj ? '#fff' : '#b2bec3', border: isEj ? 'none' : '1px solid rgba(255,255,255,0.1)' });
@@ -3449,7 +3530,7 @@
             clearPracAnnotations();
             if (pracBoardInst) pracBoardInst.position('start', false);
 
-            fetch(`/proxy/lichess-chapter/${PRAC_STUDY_ID}/${chapterId}`)
+            fetch(`/proxy/lichess-chapter/${sid}/${chapterId}`)
                 .then(r => r.json())
                 .then(data => {
                     const games = splitPgn(data.data.pgn).map((g, i) => parsePgnGame(g, i)).filter(Boolean);
@@ -3484,11 +3565,33 @@
 
         $('#btn-prac-back').click(() => {
             if (pracNavLevel === 'patterns') showPracSets();
-            else if (pracNavLevel === 'playing') showPracPatrones(pracCurrentSet);
+            else if (pracNavLevel === 'playing') {
+                if (pracCurrentSet && pracCurrentSet.tipo === 'taller') showPracLecciones(pracCurrentSet);
+                else showPracPatrones(pracCurrentSet);
+            }
         });
 
-        $('#btn-prac-teoria').click(() => { if (pracCurrentPatron) loadPracChapter(pracCurrentPatron.teoria, 'teoria'); });
-        $('#btn-prac-ejercicio').click(() => { if (pracCurrentPatron) loadPracChapter(pracCurrentPatron.ejercicio, 'ejercicio'); });
+        $('#btn-prac-teoria').click(() => {
+            if (pracCurrentPatron && pracCurrentSet && pracCurrentSet.tipo === 'patrones')
+                loadPracChapter(pracCurrentPatron.teoria, 'teoria');
+        });
+        $('#btn-prac-ejercicio').click(() => {
+            if (pracCurrentPatron && pracCurrentSet && pracCurrentSet.tipo === 'patrones')
+                loadPracChapter(pracCurrentPatron.ejercicio, 'ejercicio');
+        });
+
+        $('#btn-prac-lec-prev').click(() => {
+            if (!pracCurrentLeccion || !pracCurrentSet) return;
+            const lecs = pracCurrentSet.lecciones;
+            const idx  = lecs.indexOf(pracCurrentLeccion);
+            if (idx > 0) openPracLeccion(lecs[idx - 1]);
+        });
+        $('#btn-prac-lec-next').click(() => {
+            if (!pracCurrentLeccion || !pracCurrentSet) return;
+            const lecs = pracCurrentSet.lecciones;
+            const idx  = lecs.indexOf(pracCurrentLeccion);
+            if (idx < lecs.length - 1) openPracLeccion(lecs[idx + 1]);
+        });
 
         $(document).on('keydown.prac', function(e) {
             if ($('#section-practices').is(':hidden') || !pracPositions.length) return;
