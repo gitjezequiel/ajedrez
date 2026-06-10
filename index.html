@@ -799,7 +799,7 @@
             background: var(--bg-deep); border-radius: 6px;
         }
         .pgn-nav-bar button:hover { background: var(--accent); }
-        #pgn-status {
+        #pgn-status, #prac-status {
             text-align: center; font-size: 0.75rem;
             color: #777; margin-top: 6px; min-height: 16px;
         }
@@ -856,6 +856,9 @@
         #pgn-restart:hover { background: var(--accent); }
         #pgn-board { position: relative; }
         #pgn-arrow-svg { position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10; }
+        #prac-board { position: relative; }
+        #prac-arrow-svg { position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10; }
+        #prac-comment { margin:12px 0 0;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-left:3px solid var(--accent);border-radius:6px;font-size:0.82rem;color:#ccc;line-height:1.6;display:none; }
         #pgn-comment {
             margin: 12px 0 0;
             padding: 10px 14px;
@@ -1000,6 +1003,7 @@
         <button class="tab-btn" data-tab="exercises"><i class="fas fa-book-open"></i> Ejercicios</button>
         <button class="tab-btn" data-tab="books"><i class="fas fa-book"></i> Libros</button>
         <button class="tab-btn" data-tab="courses" style="display:none"><i class="fas fa-graduation-cap"></i> Cursos</button>
+        <button class="tab-btn" data-tab="practices"><i class="fas fa-dumbbell"></i> Prácticas</button>
     </nav>
     <button id="btn-new-game"><i class="fas fa-plus"></i> Nueva Partida</button>
 </header>
@@ -1128,6 +1132,7 @@
                     <button id="pgn-next"  title="Jugada siguiente">▶</button>
                     <button id="pgn-last"  title="Última jugada">⏭</button>
                     <button id="pgn-restart" title="Reiniciar">↺</button>
+                    <button id="pgn-toggle-auto" title="Auto-movimiento rival: activado" style="flex:0 0 auto;padding:0 10px;font-size:0.72rem;background:#2d3436;color:#00b894;">AUTO</button>
                 </div>
                 <div id="pgn-status"></div>
             </div>
@@ -1221,6 +1226,64 @@
             <!-- Detalle: secciones + lecciones -->
             <div id="courses-detail-panel" style="display:none;flex:1;overflow-y:auto;padding:16px;">
                 <div id="courses-sections-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PRACTICES SECTION ===== -->
+<div id="section-practices" style="display:none">
+    <div class="container">
+        <!-- Left: Board + Nav -->
+        <div class="left-col">
+            <div class="card">
+                <div id="prac-board" style="max-width:500px;margin:0 auto;"></div>
+                <div id="prac-feedback" class="waiting" style="display:none"></div>
+                <div class="pgn-nav-bar" id="prac-nav-bar" style="display:none">
+                    <button id="prac-first" title="Primera jugada">⏮</button>
+                    <button id="prac-prev"  title="Jugada anterior">◀</button>
+                    <button id="prac-next"  title="Jugada siguiente">▶</button>
+                    <button id="prac-last"  title="Última jugada">⏭</button>
+                    <button id="prac-restart" title="Reiniciar">↺</button>
+                    <button id="prac-toggle-auto" title="Auto-movimiento rival" style="flex:0 0 auto;padding:0 10px;font-size:0.72rem;background:#2d3436;color:#00b894;">AUTO</button>
+                </div>
+                <div id="prac-status"></div>
+            </div>
+        </div>
+
+        <!-- Right: navegación sets → patrones → playing -->
+        <div class="right-col-ex">
+            <div class="ex-header">
+                <i class="fas fa-dumbbell"></i>
+                <strong id="prac-header-title">Prácticas</strong>
+                <button id="btn-prac-back" style="display:none;margin-left:auto;background:var(--bg-darker);padding:4px 10px;font-size:0.78rem;border-radius:6px;">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+
+            <!-- Nivel 1: Lista de temas -->
+            <div id="prac-sets-panel" style="flex:1;overflow-y:auto;padding:16px;">
+                <div class="chapters-label" style="margin-bottom:12px;">Selecciona un tema</div>
+                <div id="prac-sets-list"></div>
+            </div>
+
+            <!-- Nivel 2: Lista de patrones -->
+            <div id="prac-patterns-panel" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+                <div class="chapters-label" id="prac-patterns-label" style="margin-bottom:12px;"></div>
+                <div id="prac-patterns-list"></div>
+            </div>
+
+            <!-- Nivel 3: Vista de juego -->
+            <div id="prac-playing-panel" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+                <div style="display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);">
+                    <button id="btn-prac-teoria" style="flex:1;padding:6px;border-radius:6px;background:#2d3436;color:#b2bec3;border:1px solid rgba(255,255,255,0.1);cursor:pointer;font-size:0.82rem;">📖 Teoría</button>
+                    <button id="btn-prac-ejercicio" style="flex:1;padding:6px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:0.82rem;">⚔️ Ejercicio</button>
+                </div>
+                <div id="prac-moves-wrap" style="flex:1;overflow-y:auto;padding:12px 15px;">
+                    <div id="prac-game-title" style="font-weight:600;color:#dfe6e9;margin-bottom:10px;font-size:0.9rem;"></div>
+                    <div id="prac-moves-list" style="line-height:1.9;font-size:0.88rem;"></div>
+                    <div id="prac-comment"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1985,6 +2048,8 @@
         let pgnPositions     = [];
         let pgnIndex         = 0;
         let pgnMoveAccepted  = false;
+        let librosProgresoSet = new Set();
+        let autoRivalMove    = true;
 
         // --- Tab switching ---
         let activeTab = 'analysis';
@@ -1997,18 +2062,30 @@
 
             if (tab === 'analysis') {
                 $('#section-analysis').show();
-                $('#section-exercises, #section-courses').hide();
+                $('#section-exercises, #section-courses, #section-practices').hide();
             } else if (tab === 'courses') {
-                $('#section-analysis, #section-exercises').hide();
+                $('#section-analysis, #section-exercises, #section-practices').hide();
                 $('#section-courses').show();
                 loadCursosSection();
+            } else if (tab === 'practices') {
+                $('#section-analysis, #section-exercises, #section-courses').hide();
+                $('#section-practices').show();
+                initPracticasSection();
             } else {
-                $('#section-analysis, #section-courses').hide();
+                $('#section-analysis, #section-courses, #section-practices').hide();
                 $('#section-exercises').show();
                 if (!pgnBoardReady) { initPgnBoard(); pgnBoardReady = true; }
                 if (tab === 'books') {
-                    const libroCurso = CURSOS.find(c => c.id === 'libros');
-                    if (libroCurso) showSections(libroCurso);
+                    fetch('/api/progreso').then(r => r.json()).then(ids => { librosProgresoSet = new Set(ids); }).catch(() => {});
+                    hideAllPanels();
+                    $('#pgn-sections-panel').show();
+                    $('#pgn-sections-list').html('<div style="text-align:center;padding:40px;color:#aaa;"><span class="spinner" style="width:28px;height:28px;border-width:3px;display:inline-block;margin-bottom:10px;"></span><div>Cargando libros…</div></div>');
+                    fetch('/api/libros').then(r => r.json()).then(libros => {
+                        if (libros.length > 0) showSections(libros[0]);
+                    }).catch(err => {
+                        $('#pgn-sections-list').html('<div style="text-align:center;padding:40px;color:#e74c3c;">Error cargando libros</div>');
+                        console.error(err);
+                    });
                 } else {
                     showCourses();
                 }
@@ -2036,7 +2113,7 @@
             $('#btn-back-topics').hide();
 
             const $list = $('#pgn-courses-list').empty();
-            CURSOS.filter(c => c.id !== 'libros').forEach(c => {
+            CURSOS.forEach(c => {
                 const totalLecciones = c.secciones.reduce((s, sec) => s + sec.lecciones.length, 0);
                 $(`<div class="course-card">
                     <div class="course-icon"><i class="fas fa-graduation-cap"></i></div>
@@ -2090,10 +2167,20 @@
 
             const $list = $('#pgn-topics-list').empty();
             seccion.lecciones.forEach(l => {
-                $(`<div class="topic-card">
-                    <div class="topic-title"><i class="fas fa-chess-board"></i> ${l.titulo}</div>
-                    <div class="topic-sub">${l.subtitulo || ''}</div>
-                </div>`).on('click', () => l.sublecciones ? showSublessons(l) : cargarLeccion(l)).appendTo($list);
+                const visto = librosProgresoSet.has(l.id);
+                const $card = $(`<div class="topic-card" style="display:flex;align-items:center;gap:8px;${visto ? 'opacity:0.55;' : ''}">
+                    <div style="flex:1;">
+                        <div class="topic-title"><i class="fas fa-chess-board"></i> ${l.titulo}</div>
+                        <div class="topic-sub">${l.subtitulo || ''}</div>
+                    </div>
+                    <button class="btn-libro-visto" data-id="${l.id}" title="${visto ? 'Marcar como no visto' : 'Marcar como visto'}"
+                        style="background:none;border:none;cursor:pointer;font-size:1.2rem;padding:4px 6px;color:${visto ? '#00b894' : '#555'};">
+                        ${visto ? '✓' : '○'}
+                    </button>
+                </div>`);
+                $card.find('.topic-title, .topic-sub').on('click', () => l.sublecciones ? showSublessons(l) : cargarLeccion(l));
+                $card.find('.btn-libro-visto').on('click', e => { e.stopPropagation(); toggleLibroVisto(l.id, $card); });
+                $card.appendTo($list);
             });
         }
 
@@ -2109,11 +2196,39 @@
 
             const $list = $('#pgn-topics-list').empty();
             leccion.sublecciones.forEach(sub => {
-                $(`<div class="topic-card">
-                    <div class="topic-title"><i class="fas fa-chess-board"></i> ${sub.titulo}</div>
-                    <div class="topic-sub">${sub.subtitulo || ''}</div>
-                </div>`).on('click', () => cargarLeccion(sub, true)).appendTo($list);
+                const visto = librosProgresoSet.has(sub.id);
+                const $card = $(`<div class="topic-card" style="display:flex;align-items:center;gap:8px;${visto ? 'opacity:0.55;' : ''}">
+                    <div style="flex:1;">
+                        <div class="topic-title"><i class="fas fa-chess-board"></i> ${sub.titulo}</div>
+                        <div class="topic-sub">${sub.subtitulo || ''}</div>
+                    </div>
+                    <button class="btn-libro-visto" data-id="${sub.id}" title="${visto ? 'Marcar como no visto' : 'Marcar como visto'}"
+                        style="background:none;border:none;cursor:pointer;font-size:1.2rem;padding:4px 6px;color:${visto ? '#00b894' : '#555'};">
+                        ${visto ? '✓' : '○'}
+                    </button>
+                </div>`);
+                $card.find('.topic-title, .topic-sub').on('click', () => cargarLeccion(sub, true));
+                $card.find('.btn-libro-visto').on('click', e => { e.stopPropagation(); toggleLibroVisto(sub.id, $card); });
+                $card.appendTo($list);
             });
+        }
+
+        function toggleLibroVisto(id, $card) {
+            fetch(`/api/progreso/${id}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) return;
+                    const $btn = $card.find('.btn-libro-visto');
+                    if (data.visto) {
+                        librosProgresoSet.add(id);
+                        $btn.text('✓').css('color', '#00b894').attr('title', 'Marcar como no visto');
+                        $card.css('opacity', '0.55');
+                    } else {
+                        librosProgresoSet.delete(id);
+                        $btn.text('○').css('color', '#555').attr('title', 'Marcar como visto');
+                        $card.css('opacity', '1');
+                    }
+                });
         }
 
         function cargarLeccion(leccion, isSub = false) {
@@ -2123,19 +2238,21 @@
                 currentLeccion = leccion;
                 currentSubleccion = null;
             }
-            hideAllPanels();
-            $('#pgn-feedback').show().attr('class','waiting').html(
-                '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span> Cargando...'
-            );
-            $('#pgn-exercises-panel').show();
-            $('#ex-header-title').text(leccion.titulo);
             const backLabel = isSub ? currentLeccion.titulo : currentSeccion.nombre;
+            hideAllPanels();
+            $('#pgn-topics-panel').show();
+            $('#pgn-nav-bar, #pgn-feedback').hide();
+            $('#ex-header-title').text(leccion.titulo);
             $('#btn-back-topics').show().html('<i class="fas fa-arrow-left"></i> ' + backLabel);
+            $('#pgn-topics-list').html(`
+                <div style="text-align:center;padding:50px 20px;color:#aaa;">
+                    <span class="spinner" style="width:34px;height:34px;border-width:3px;display:inline-block;margin-bottom:14px;"></span>
+                    <div style="font-size:0.88rem;">${leccion.titulo}</div>
+                </div>
+            `);
 
             if (leccion.api === 'video-only') {
-                $('#pgn-feedback').attr('class','waiting').html(
-                    '<i class="fas fa-video" style="margin-right:7px;"></i>Esta lección es contenido de video — no tiene ejercicios interactivos.'
-                );
+                $('#pgn-topics-list').html('<div style="color:#aaa;text-align:center;padding:20px;font-size:0.85rem;"><i class="fas fa-video" style="margin-right:7px;"></i>Esta lección es contenido de video.</div>');
                 return;
             }
             let fetchUrl;
@@ -2156,7 +2273,7 @@
                     }
                     pgnGames = games;
                     if (!pgnGames.length) {
-                        $('#pgn-feedback').attr('class','wrong').text('✗ Error al cargar el estudio.');
+                        $('#pgn-topics-list').html('<div style="color:#e17055;text-align:center;padding:20px;">✗ Sin contenido en este estudio.</div>');
                         return;
                     }
                     notesLeccionId = leccion.id;
@@ -2167,7 +2284,7 @@
                         .finally(() => showExercises());
                 })
                 .catch(() => {
-                    $('#pgn-feedback').attr('class','wrong').text('✗ Error al cargar el estudio.');
+                    $('#pgn-topics-list').html('<div style="color:#e17055;text-align:center;padding:20px;">✗ Error al cargar el estudio.</div>');
                 });
         }
 
@@ -2187,14 +2304,23 @@
                 const moves = g.positions.length - 1;
                 const movesLabel = g.isStatic ? 'Teoría' : `${moves} jugada${moves !== 1 ? 's' : ''}`;
                 const hasNote = currentNotes[i] && currentNotes[i].length > 0;
-                $(`<div class="exercise-card">
+                const exId = `${notesLeccionId}_ex_${i}`;
+                const visto = librosProgresoSet.has(exId);
+                const $card = $(`<div class="exercise-card" style="${visto ? 'opacity:0.55;' : ''}">
                     <div class="exercise-num">${i + 1}</div>
                     <div style="flex:1">
                         <div class="exercise-name">${g.title}</div>
                         <div class="exercise-moves">${movesLabel}</div>
                     </div>
                     ${hasNote ? '<div style="font-size:13px;color:#555;" title="Tiene notas">📝</div>' : ''}
-                </div>`).on('click', () => playExercise(i)).appendTo($list);
+                    <button class="btn-libro-visto" title="${visto ? 'Marcar como no visto' : 'Marcar como visto'}"
+                        style="background:none;border:none;cursor:pointer;font-size:1.1rem;padding:2px 6px;color:${visto ? '#00b894' : '#555'};">
+                        ${visto ? '✓' : '○'}
+                    </button>
+                </div>`);
+                $card.on('click', () => playExercise(i));
+                $card.find('.btn-libro-visto').on('click', e => { e.stopPropagation(); toggleLibroVisto(exId, $card); });
+                $card.appendTo($list);
             });
         }
 
@@ -2692,21 +2818,24 @@
                     showFeedback('done', '🎉 ¡Ejercicio completado! Excelente.');
                 } else {
                     showFeedback('correct', '✓ ¡Correcto!');
-                    // Juega la respuesta del rival automáticamente
-                    setTimeout(() => {
-                        pgnIndex++;
-                        pgnBoardInstance.position(pgnPositions[pgnIndex].fen, true);
-                        highlightCurrentMove();
-                        $('#pgn-status').text(`Jugada ${pgnIndex} de ${total} — ${pgnPositions[pgnIndex].label}`);
+                    if (autoRivalMove) {
                         setTimeout(() => {
-                            renderAnnotations(pgnPositions[pgnIndex]);
-                            if (pgnIndex >= total) {
-                                showFeedback('done', '🎉 ¡Ejercicio completado! Excelente.');
-                            } else {
-                                showFeedback('waiting', '♟ Tu turno — mueve una pieza');
-                            }
-                        }, 400);
-                    }, 600);
+                            pgnIndex++;
+                            pgnBoardInstance.position(pgnPositions[pgnIndex].fen, true);
+                            highlightCurrentMove();
+                            $('#pgn-status').text(`Jugada ${pgnIndex} de ${total} — ${pgnPositions[pgnIndex].label}`);
+                            setTimeout(() => {
+                                renderAnnotations(pgnPositions[pgnIndex]);
+                                if (pgnIndex >= total) {
+                                    showFeedback('done', '🎉 ¡Ejercicio completado! Excelente.');
+                                } else {
+                                    showFeedback('waiting', '♟ Tu turno — mueve una pieza');
+                                }
+                            }, 400);
+                        }, 600);
+                    } else {
+                        showFeedback('correct', '✓ ¡Correcto! Presiona ▶ para ver la respuesta rival.');
+                    }
                 }
             }
         }
@@ -2729,6 +2858,13 @@
         $('#pgn-next').click(()    => { if (pgnIndex < pgnPositions.length-1) { pgnIndex++; updatePgnBoard(); } });
         $('#pgn-last').click(()    => { pgnIndex = pgnPositions.length-1; updatePgnBoard(); });
         $('#pgn-restart').click(() => { pgnIndex = 0; updatePgnBoard(); showFeedback('waiting','♟ Tu turno — mueve una pieza'); });
+        $('#pgn-toggle-auto').click(() => {
+            autoRivalMove = !autoRivalMove;
+            $('#pgn-toggle-auto')
+                .text(autoRivalMove ? 'AUTO' : 'MANUAL')
+                .css('color', autoRivalMove ? '#00b894' : '#b2bec3')
+                .attr('title', `Auto-movimiento rival: ${autoRivalMove ? 'activado' : 'desactivado'}`);
+        });
 
         // Arrow key navigation
         $(document).on('keydown', function(e) {
@@ -2772,6 +2908,377 @@
                 $('#btn-send').click();
             }
         });
+
+        // =====================================================================
+        // PRÁCTICAS
+        // =====================================================================
+        const PRAC_STUDY_ID = 'uYSaJEgT';
+        const PRACTICAS_SETS = [{
+            id: 'mates-30',
+            titulo: '30 Patrones de Jaque Mate',
+            descripcion: 'Aprende y practica los 30 patrones de jaque mate más importantes',
+            patrones: [
+                { num:  1, nombre: 'Anastasia',          teoria: 'M2KYXpQ9', ejercicio: 'ywyheGP5' },
+                { num:  2, nombre: 'Anderssen',           teoria: '7kYfC10H', ejercicio: 'AehBI4fY' },
+                { num:  3, nombre: 'Árabe',               teoria: 'bhuDBN53', ejercicio: 'nQgt4DWv' },
+                { num:  4, nombre: 'Asfixia',             teoria: 'd7pIqPDT', ejercicio: 'nZLZZ9bt' },
+                { num:  5, nombre: 'Ballesta',            teoria: 'b6bNcQBH', ejercicio: 'IVkari5P' },
+                { num:  6, nombre: 'Barrido',             teoria: 'OfAbNQU5', ejercicio: '5JUB0SGz' },
+                { num:  7, nombre: 'Blackburne',          teoria: 'iRCP9NO0', ejercicio: 'EEssNhsu' },
+                { num:  8, nombre: 'Boden',               teoria: 'B7T4ng0O', ejercicio: '3oTrwRQT' },
+                { num:  9, nombre: 'Caja de la muerte',   teoria: 'e8j9Ipio', ejercicio: 'Ir1ZCwfN' },
+                { num: 10, nombre: 'Callejón de la muerte', teoria: 'JKMi9LC2', ejercicio: 'rmxhFHVV' },
+                { num: 11, nombre: 'Cerdo ciego',         teoria: 'oih5ketA', ejercicio: 'zpZgyfDK' },
+                { num: 12, nombre: 'Cola de golondrina',  teoria: 'pdTcBDKW', ejercicio: 'R8nbaQey' },
+                { num: 13, nombre: 'Coz',                 teoria: 'DtmIXz6n', ejercicio: 'Y3TmhJFP' },
+                { num: 14, nombre: 'Cozio',               teoria: 'vrBgHOmq', ejercicio: 'pj4vNXLL' },
+                { num: 15, nombre: 'Damiano',             teoria: 'wrmNklaQ', ejercicio: 'liZ8u4vp' },
+                { num: 16, nombre: 'David y Goliat',      teoria: 'ExZTdSYd', ejercicio: 'MUgbEtO2' },
+                { num: 17, nombre: 'Diagonal de la muerte', teoria: '0VgfRmcG', ejercicio: 'BVmrxXNJ' },
+                { num: 18, nombre: 'Escalera',            teoria: 'baRUtnpa', ejercicio: 'cIyHjR6A' },
+                { num: 19, nombre: 'Gancho',              teoria: 'rkMV5pLU', ejercicio: 'q9VAkmXe' },
+                { num: 20, nombre: 'Greco',               teoria: 'MzoTCwaq', ejercicio: '7NdHiCKQ' },
+                { num: 21, nombre: 'Hombreras',           teoria: 'MVZiljGR', ejercicio: 'xH6FJFqr' },
+                { num: 22, nombre: 'Lolli',               teoria: '6v50IXEc', ejercicio: 'fSMA8TEV' },
+                { num: 23, nombre: 'Max Lange',           teoria: 'HGscutTU', ejercicio: 'DeVG2dgN' },
+                { num: 24, nombre: 'Mayet',               teoria: 'y4MQWEMX', ejercicio: 'fV7IQnM6' },
+                { num: 25, nombre: 'Morphy',              teoria: 'bddpPDf6', ejercicio: 'VBs1uEtG' },
+                { num: 26, nombre: 'Ópera',               teoria: 'muBdcddu', ejercicio: 'J7UdlnM0' },
+                { num: 27, nombre: 'Pasillo',             teoria: '1laSrHgj', ejercicio: 'k1du74Un' },
+                { num: 28, nombre: 'Pillsbury',           teoria: 'm4OLrHvS', ejercicio: 'C59XdDuq' },
+                { num: 29, nombre: 'Triángulo',           teoria: 'jFrW3d0Y', ejercicio: 'yE9vHX4U' },
+                { num: 30, nombre: 'Vukovic',             teoria: 'IXbbaK1T', ejercicio: '8gy1Tf1v' }
+            ]
+        }];
+
+        let pracNavLevel     = 'sets';
+        let pracCurrentSet   = null;
+        let pracCurrentPatron = null;
+        let pracCurrentMode  = 'ejercicio';
+        let pracBoardInst    = null;
+        let pracBoardReady   = false;
+        let pracPositions    = [];
+        let pracIndex        = 0;
+        let pracMoveAccepted = false;
+        let pracAutoRival    = true;
+        let pracSelSquare    = null;
+
+        const PRAC_ANN_COLORS = { G:'#15b552', R:'#e74c3c', Y:'#f0c000', B:'#2196f3' };
+
+        function initPracBoard() {
+            if (pracBoardReady) return;
+            pracBoardInst = Chessboard('prac-board', {
+                position: 'start', draggable: true,
+                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+                onDrop: onPracDrop, onSnapEnd: onPracSnapEnd, onSquareClick: onPracSquareClick
+            });
+            initTouchSupport('prac-board', () => pracBoardInst.position(), onPracSquareClick);
+            pracBoardReady = true;
+        }
+
+        function updatePracBoard() {
+            if (!pracBoardInst || !pracPositions.length) return;
+            const pos = pracPositions[pracIndex];
+            pracBoardInst.position(pos.fen, false);
+            const total = pracPositions.length - 1;
+            $('#prac-status').text(pracIndex === 0 ? 'Posición inicial'
+                : `Jugada ${pracIndex} de ${total} — ${pos.label}`);
+            highlightPracMove();
+            renderPracAnnotations(pos);
+        }
+
+        function clearPracAnnotations() {
+            const svg = document.getElementById('prac-arrow-svg');
+            if (svg) svg.remove();
+            $('#prac-comment').hide().text('');
+        }
+
+        function renderPracAnnotations(pos) {
+            clearPracAnnotations();
+            if (!pos || !pos.annotation) return;
+            const ann = pos.annotation;
+            const boardEl = document.getElementById('prac-board');
+            if (!boardEl) return;
+            const size = boardEl.offsetWidth, sq = size / 8;
+            if (!ann.csl.length && !ann.cal.length) {
+                if (ann.text) $('#prac-comment').text(ann.text).show();
+                return;
+            }
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = 'prac-arrow-svg';
+            svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+            if (ann.cal.length) {
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                [...new Set(ann.cal.map(a => a.color))].forEach(code => {
+                    const c = PRAC_ANN_COLORS[code] || PRAC_ANN_COLORS.G;
+                    const m = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                    m.setAttribute('id', `pa-${code}`); m.setAttribute('markerWidth','3'); m.setAttribute('markerHeight','3');
+                    m.setAttribute('refX','1.5'); m.setAttribute('refY','1.5'); m.setAttribute('orient','auto');
+                    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    p.setAttribute('d','M0,0 L0,3 L3,1.5 z'); p.setAttribute('fill', c);
+                    m.appendChild(p); defs.appendChild(m);
+                });
+                svg.appendChild(defs);
+            }
+            ann.csl.forEach(({ color, sq: square }) => {
+                const c = PRAC_ANN_COLORS[color] || PRAC_ANN_COLORS.G;
+                const col = square.charCodeAt(0) - 97, row = parseInt(square[1]) - 1;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', (col+0.5)*sq); circle.setAttribute('cy', (7-row+0.5)*sq);
+                circle.setAttribute('r', sq*0.42); circle.setAttribute('fill', c); circle.setAttribute('fill-opacity','0.5');
+                svg.appendChild(circle);
+            });
+            ann.cal.forEach(({ color, from, to }) => {
+                const c = PRAC_ANN_COLORS[color] || PRAC_ANN_COLORS.G;
+                const f = from.charCodeAt(0)-97, fr = parseInt(from[1])-1;
+                const t = to.charCodeAt(0)-97,   tr = parseInt(to[1])-1;
+                const x1=(f+0.5)*sq, y1=(7-fr+0.5)*sq, x2=(t+0.5)*sq, y2=(7-tr+0.5)*sq;
+                const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy), shrink=sq*0.38;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+                line.setAttribute('x2',x2-(dx/len)*shrink); line.setAttribute('y2',y2-(dy/len)*shrink);
+                line.setAttribute('stroke',c); line.setAttribute('stroke-width',sq*0.2);
+                line.setAttribute('stroke-opacity','0.82'); line.setAttribute('stroke-linecap','round');
+                line.setAttribute('marker-end',`url(#pa-${color})`);
+                svg.appendChild(line);
+            });
+            boardEl.appendChild(svg);
+            if (ann.text) $('#prac-comment').text(ann.text).show();
+        }
+
+        function renderPracMoveList() {
+            const $list = $('#prac-moves-list').empty();
+            if (pracPositions.length < 2) return;
+            let html = '', lastNum = -1;
+            for (let i = 1; i < pracPositions.length; i++) {
+                const p = pracPositions[i];
+                if (p.color === 'w') html += `<span class="pgn-move-num">${p.moveNum}.</span>`;
+                else if (lastNum !== p.moveNum) html += `<span class="pgn-move-num">${p.moveNum}…</span>`;
+                html += `<span class="pgn-move" data-pidx="${i}">${p.san}</span>`;
+                if (p.color === 'b') html += ' ';
+                lastNum = p.moveNum;
+            }
+            $list.html(html).on('click', '.pgn-move', function() {
+                pracIndex = parseInt($(this).data('pidx'));
+                updatePracBoard();
+                if (pracCurrentMode === 'ejercicio') showPracFeedback('waiting', '♟ Tu turno — mueve una pieza');
+            });
+            highlightPracMove();
+        }
+
+        function highlightPracMove() {
+            $('#prac-moves-list .pgn-move').removeClass('current');
+            if (pracIndex > 0) {
+                const $c = $(`#prac-moves-list .pgn-move[data-pidx="${pracIndex}"]`).addClass('current');
+                if ($c.length) $c[0].scrollIntoView({ block:'nearest', behavior:'smooth' });
+            }
+        }
+
+        function clearPracSel() {
+            pracSelSquare = null;
+            $('#prac-board .square-55d63').removeClass('highlight-selected');
+        }
+
+        function onPracSquareClick(square, piece) {
+            if (!pracPositions.length) return;
+            const temp = new Chess(pracPositions[pracIndex].fen);
+            const isOwn = piece && piece[0].toLowerCase() === temp.turn();
+            if (pracSelSquare === null) {
+                if (!isOwn) return;
+                pracSelSquare = square;
+                $(`#prac-board .square-${square}`).addClass('highlight-selected');
+                return;
+            }
+            if (square === pracSelSquare) { clearPracSel(); return; }
+            if (isOwn) { clearPracSel(); pracSelSquare = square; $(`#prac-board .square-${square}`).addClass('highlight-selected'); return; }
+            const r = onPracDrop(pracSelSquare, square);
+            clearPracSel();
+            if (r === 'snapback') return;
+            onPracSnapEnd();
+        }
+
+        function onPracDrop(source, target) {
+            pracMoveAccepted = false;
+            if (source === target || !pracPositions.length) return 'snapback';
+            if (pracCurrentMode === 'teoria') return 'snapback';
+            const expected = pracPositions[pracIndex + 1];
+            if (!expected) { showPracFeedback('done', '🎉 ¡Ejercicio completado!'); return 'snapback'; }
+            const temp = new Chess(pracPositions[pracIndex].fen);
+            const moved = temp.move({ from: source, to: target, promotion: 'q' });
+            if (!moved) return 'snapback';
+            if (moved.san === expected.san) {
+                pracIndex++;
+                pracMoveAccepted = true;
+            } else {
+                showPracFeedback('wrong', `✗ Incorrecto. La jugada era: <strong>${expected.san}</strong>`);
+                const tm = new Chess(pracPositions[pracIndex].fen), mv = tm.move(expected.san);
+                if (mv) {
+                    $('.square-' + mv.from).addClass('hint-from');
+                    $('.square-' + mv.to).addClass('hint-to');
+                    setTimeout(() => $('.hint-from,.hint-to').removeClass('hint-from hint-to'), 1800);
+                }
+                return 'snapback';
+            }
+        }
+
+        function onPracSnapEnd() {
+            if (!pracPositions[pracIndex]) return;
+            pracBoardInst.position(pracPositions[pracIndex].fen, false);
+            if (!pracMoveAccepted) return;
+            pracMoveAccepted = false;
+            highlightPracMove();
+            renderPracAnnotations(pracPositions[pracIndex]);
+            const total = pracPositions.length - 1;
+            $('#prac-status').text(`Jugada ${pracIndex} de ${total} — ${pracPositions[pracIndex].label}`);
+            if (pracIndex >= total) {
+                showPracFeedback('done', '🎉 ¡Ejercicio completado! Excelente.');
+            } else {
+                showPracFeedback('correct', '✓ ¡Correcto!');
+                if (pracAutoRival) {
+                    setTimeout(() => {
+                        pracIndex++;
+                        pracBoardInst.position(pracPositions[pracIndex].fen, true);
+                        highlightPracMove();
+                        $('#prac-status').text(`Jugada ${pracIndex} de ${total} — ${pracPositions[pracIndex].label}`);
+                        setTimeout(() => {
+                            renderPracAnnotations(pracPositions[pracIndex]);
+                            if (pracIndex >= total) showPracFeedback('done', '🎉 ¡Ejercicio completado! Excelente.');
+                            else showPracFeedback('waiting', '♟ Tu turno — mueve una pieza');
+                        }, 400);
+                    }, 600);
+                } else {
+                    showPracFeedback('correct', '✓ ¡Correcto! Presiona ▶ para ver la respuesta rival.');
+                }
+            }
+        }
+
+        function showPracFeedback(type, html) {
+            $('#prac-feedback').show().attr('class', type).html(html);
+        }
+
+        function showPracSets() {
+            pracNavLevel = 'sets';
+            $('#prac-sets-panel').show();
+            $('#prac-patterns-panel, #prac-playing-panel').hide();
+            $('#prac-nav-bar, #prac-feedback').hide();
+            $('#prac-status').text('');
+            $('#prac-header-title').text('Prácticas');
+            $('#btn-prac-back').hide();
+            clearPracAnnotations();
+            if (pracBoardInst) pracBoardInst.position('start', false);
+            const $list = $('#prac-sets-list').empty();
+            PRACTICAS_SETS.forEach(set => {
+                const $card = $(`<div class="topic-card" style="cursor:pointer;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:1.8rem;">♚</span>
+                        <div style="flex:1;">
+                            <div class="topic-title">${set.titulo}</div>
+                            <div class="topic-sub">${set.patrones.length} patrones · Lichess Chess-Enigma</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color:#636e72;"></i>
+                    </div>
+                </div>`);
+                $card.on('click', () => showPracPatrones(set));
+                $card.appendTo($list);
+            });
+        }
+
+        function showPracPatrones(set) {
+            pracNavLevel = 'patterns';
+            pracCurrentSet = set;
+            $('#prac-sets-panel').hide();
+            $('#prac-patterns-panel').show();
+            $('#prac-playing-panel').hide();
+            $('#prac-nav-bar, #prac-feedback').hide();
+            $('#prac-status').text('');
+            $('#prac-header-title').text(set.titulo);
+            $('#prac-patterns-label').text(`${set.patrones.length} Patrones de Jaque Mate`);
+            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> Prácticas');
+            const $list = $('#prac-patterns-list').empty();
+            set.patrones.forEach(p => {
+                const $card = $(`<div class="exercise-card" style="cursor:pointer;">
+                    <div class="exercise-num">${p.num}</div>
+                    <div style="flex:1;">
+                        <div class="exercise-name">${p.nombre}</div>
+                        <div class="exercise-moves">Mate de ${p.nombre}</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:#636e72;margin-left:auto;"></i>
+                </div>`);
+                $card.on('click', () => openPracPatron(p));
+                $card.appendTo($list);
+            });
+        }
+
+        function openPracPatron(patron) {
+            pracNavLevel = 'playing';
+            pracCurrentPatron = patron;
+            $('#prac-sets-panel, #prac-patterns-panel').hide();
+            $('#prac-playing-panel').css('display', 'flex');
+            $('#prac-header-title').text(patron.nombre);
+            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
+            loadPracChapter(patron.ejercicio, 'ejercicio');
+        }
+
+        function loadPracChapter(chapterId, mode) {
+            pracCurrentMode = mode;
+            const isEj = mode === 'ejercicio';
+            $('#btn-prac-ejercicio').css({ background: isEj ? 'var(--accent)' : '#2d3436', color: isEj ? '#fff' : '#b2bec3', border: isEj ? 'none' : '1px solid rgba(255,255,255,0.1)' });
+            $('#btn-prac-teoria').css({ background: isEj ? '#2d3436' : 'var(--accent)', color: isEj ? '#b2bec3' : '#fff', border: isEj ? '1px solid rgba(255,255,255,0.1)' : 'none' });
+            $('#prac-nav-bar').hide();
+            $('#prac-feedback').hide();
+            $('#prac-status').text('');
+            $('#prac-moves-list').html('<div style="text-align:center;padding:30px;color:#aaa;"><span class="spinner" style="width:28px;height:28px;border-width:3px;display:inline-block;"></span></div>');
+            clearPracAnnotations();
+            if (pracBoardInst) pracBoardInst.position('start', false);
+
+            fetch(`/proxy/lichess-chapter/${PRAC_STUDY_ID}/${chapterId}`)
+                .then(r => r.json())
+                .then(data => {
+                    const games = splitPgn(data.data.pgn).map((g, i) => parsePgnGame(g, i)).filter(Boolean);
+                    if (!games.length) { $('#prac-moves-list').html('<div style="color:#e17055;text-align:center;padding:20px;">Sin contenido.</div>'); return; }
+                    const game = games[0];
+                    pracPositions = game.positions;
+                    pracIndex = 0;
+                    $('#prac-game-title').text(game.title);
+                    renderPracMoveList();
+                    updatePracBoard();
+                    $('#prac-nav-bar').show();
+                    if (isEj) showPracFeedback('waiting', '♟ Tu turno — encuentra el jaque mate');
+                })
+                .catch(() => { $('#prac-moves-list').html('<div style="color:#e17055;text-align:center;padding:20px;">Error al cargar.</div>'); });
+        }
+
+        function initPracticasSection() {
+            initPracBoard();
+            if (pracNavLevel === 'sets') showPracSets();
+        }
+
+        // Nav buttons
+        $('#prac-first').click(()    => { pracIndex = 0; updatePracBoard(); if (pracCurrentMode === 'ejercicio') showPracFeedback('waiting','♟ Tu turno — mueve una pieza'); });
+        $('#prac-prev').click(()     => { if (pracIndex > 0) { pracIndex--; updatePracBoard(); } });
+        $('#prac-next').click(()     => { if (pracIndex < pracPositions.length-1) { pracIndex++; updatePracBoard(); } });
+        $('#prac-last').click(()     => { pracIndex = pracPositions.length-1; updatePracBoard(); });
+        $('#prac-restart').click(()  => { pracIndex = 0; updatePracBoard(); if (pracCurrentMode === 'ejercicio') showPracFeedback('waiting','♟ Tu turno — mueve una pieza'); });
+        $('#prac-toggle-auto').click(() => {
+            pracAutoRival = !pracAutoRival;
+            $('#prac-toggle-auto').text(pracAutoRival ? 'AUTO' : 'MANUAL').css('color', pracAutoRival ? '#00b894' : '#b2bec3');
+        });
+
+        $('#btn-prac-back').click(() => {
+            if (pracNavLevel === 'patterns') showPracSets();
+            else if (pracNavLevel === 'playing') showPracPatrones(pracCurrentSet);
+        });
+
+        $('#btn-prac-teoria').click(() => { if (pracCurrentPatron) loadPracChapter(pracCurrentPatron.teoria, 'teoria'); });
+        $('#btn-prac-ejercicio').click(() => { if (pracCurrentPatron) loadPracChapter(pracCurrentPatron.ejercicio, 'ejercicio'); });
+
+        $(document).on('keydown.prac', function(e) {
+            if ($('#section-practices').is(':hidden') || !pracPositions.length) return;
+            if ($(e.target).is('input,textarea')) return;
+            if (e.key === 'ArrowRight') { e.preventDefault(); if (pracIndex < pracPositions.length-1) { pracIndex++; updatePracBoard(); } }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); if (pracIndex > 0) { pracIndex--; updatePracBoard(); } }
+        });
+
     });
 
     // =====================================================================

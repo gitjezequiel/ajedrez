@@ -584,6 +584,75 @@ def api_cursos():
         return jsonify({"errors": str(e)}), 500
 
 
+@app.route('/api/libros')
+def api_libros():
+    try:
+        conn = get_db()
+        cur = conn.cursor(dictionary=True)
+
+        cur.execute("SELECT id, nombre, descripcion FROM libros ORDER BY orden")
+        libros = cur.fetchall()
+
+        cur.execute("SELECT id, libro_id, nombre FROM libros_secciones ORDER BY orden")
+        secciones = cur.fetchall()
+
+        cur.execute("SELECT id, seccion_id, titulo, subtitulo, api, study_id, chapter_index FROM libros_lecciones ORDER BY orden")
+        lecciones = cur.fetchall()
+
+        cur.execute("SELECT id, leccion_id, study_id, api, titulo FROM libros_sublecciones ORDER BY orden")
+        sublecciones = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        subs_by_lec = {}
+        for s in sublecciones:
+            subs_by_lec.setdefault(s['leccion_id'], []).append({
+                'id': s['id'],
+                'studyId': s['study_id'],
+                'api': s['api'],
+                'titulo': s['titulo'],
+            })
+
+        lecs_by_sec = {}
+        for l in lecciones:
+            obj = {'id': l['id'], 'titulo': l['titulo']}
+            if l['subtitulo']:
+                obj['subtitulo'] = l['subtitulo']
+            if l['api']:
+                obj['api'] = l['api']
+            if l['study_id']:
+                obj['studyId'] = l['study_id']
+            if l['chapter_index'] is not None:
+                obj['chapterIndex'] = l['chapter_index']
+            subs = subs_by_lec.get(l['id'])
+            if subs:
+                obj['sublecciones'] = subs
+            lecs_by_sec.setdefault(l['seccion_id'], []).append(obj)
+
+        secs_by_libro = {}
+        for s in secciones:
+            secs_by_libro.setdefault(s['libro_id'], []).append({
+                'id': s['id'],
+                'nombre': s['nombre'],
+                'lecciones': lecs_by_sec.get(s['id'], []),
+            })
+
+        result = []
+        for l in libros:
+            result.append({
+                'id': l['id'],
+                'nombre': l['nombre'],
+                'descripcion': l['descripcion'] or '',
+                'secciones': secs_by_libro.get(l['id'], []),
+            })
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"errors": str(e)}), 500
+
+
 @app.route('/proxy/study/<study_id>')
 def proxy_study(study_id):
     import urllib.request
