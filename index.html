@@ -1051,6 +1051,56 @@
         .sc-g { color: #00b894; font-weight: 600; }
         .sc-y { color: #f0c000; font-weight: 600; }
         .sc-r { color: #e17055; font-weight: 600; }
+
+        /* ── Tracker: ciclo switcher ─────────────── */
+        .trk-ciclo-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+        .trk-ciclo-select { background: #2d3436; border: 1px solid rgba(255,255,255,.1); color: #dfe6e9; padding: 7px 12px; border-radius: 6px; font-size: 0.82rem; flex: 1; min-width: 0; max-width: 360px; cursor: pointer; }
+        .trk-new-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 7px 16px; font-size: 0.83rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .trk-new-btn:hover { filter: brightness(1.12); }
+
+        /* ── Tracker: modal overlay ─────────────── */
+        .trk-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 2000; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 28px 12px 40px; }
+        .trk-modal { background: #1a1a2e; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; width: 100%; max-width: 660px; }
+        .trk-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid rgba(255,255,255,.07); }
+        .trk-modal-head h3 { color: #dfe6e9; font-size: 1rem; margin: 0; font-weight: 700; }
+        .trk-modal-close { background: none; border: none; color: #636e72; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; line-height: 1; }
+        .trk-modal-close:hover { color: #e17055; background: rgba(231,80,85,.1); }
+        .trk-modal-body { padding: 18px 22px; }
+        .trk-modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 18px; border-top: 1px solid rgba(255,255,255,.07); }
+        .trk-form-section { font-size: 0.74rem; font-weight: 700; color: #636e72; text-transform: uppercase; letter-spacing: .07em; margin: 14px 0 8px; }
+        .trk-form-section:first-child { margin-top: 0; }
+        .trk-form-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .trk-form-group { flex: 1; min-width: 140px; }
+        .trk-form-group label { font-size: 0.73rem; color: #636e72; display: block; margin-bottom: 3px; }
+        .trk-form-group input, .trk-form-group select, .trk-form-group textarea
+          { background: #2d3436; border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #dfe6e9; padding: 7px 10px; font-size: 0.82rem; width: 100%; box-sizing: border-box; }
+        .trk-form-group textarea { resize: vertical; min-height: 58px; }
+        .trk-form-group input:focus, .trk-form-group select:focus, .trk-form-group textarea:focus
+          { outline: none; border-color: var(--accent); }
+        /* Meta cards */
+        .trk-mcards { margin-bottom: 8px; }
+        .trk-mcard { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+        .trk-mcard-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .trk-mcard-num { font-size: 0.68rem; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .05em; }
+        .trk-mcard-del { background: none; border: none; color: #555; cursor: pointer; font-size: 0.72rem; margin-left: auto; padding: 2px 7px; border-radius: 4px; }
+        .trk-mcard-del:hover { color: #e17055; }
+        .trk-tac-sub { font-size: 0.68rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .05em; margin: 10px 0 6px; }
+        .trk-tac-item { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .trk-tac-item input[type="text"] { flex: 1; background: #2d3436; border: 1px solid rgba(255,255,255,.08); border-radius: 5px; color: #dfe6e9; padding: 5px 8px; font-size: 0.8rem; }
+        .trk-tac-item input[type="text"]:focus { outline: none; border-color: var(--accent); }
+        .trk-tac-item input[type="number"] { width: 50px; background: #2d3436; border: 1px solid rgba(255,255,255,.08); border-radius: 5px; color: #dfe6e9; padding: 5px 6px; font-size: 0.8rem; text-align: center; }
+        .trk-tac-item input[type="number"]:focus { outline: none; border-color: var(--accent); }
+        .trk-tac-del { background: none; border: none; color: #555; cursor: pointer; font-size: 0.7rem; padding: 2px 5px; }
+        .trk-tac-del:hover { color: #e17055; }
+        .trk-add-tac { background: none; border: none; color: #636e72; font-size: 0.77rem; cursor: pointer; padding: 2px 0; text-decoration: underline; }
+        .trk-add-tac:hover { color: var(--accent); }
+        .trk-add-meta-btn { display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(255,255,255,.03); border: 1px dashed rgba(255,255,255,.12); border-radius: 8px; padding: 10px 14px; color: #636e72; font-size: 0.82rem; cursor: pointer; width: 100%; }
+        .trk-add-meta-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .trk-btn-cancel { background: #2d3436; border: none; color: #b2bec3; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+        .trk-btn-cancel:hover { background: #3d4446; }
+        .trk-btn-primary { background: var(--accent); border: none; color: #fff; padding: 8px 22px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+        .trk-btn-primary:hover { filter: brightness(1.1); }
+        .trk-btn-primary:disabled { opacity: .5; cursor: default; filter: none; }
     </style>
 </head>
 <body>
@@ -1353,6 +1403,12 @@
 <div id="section-tracker" class="section panel" style="display:none">
   <div class="trk-wrap">
 
+    <!-- Ciclo switcher -->
+    <div class="trk-ciclo-bar">
+      <select id="trk-ciclo-select" class="trk-ciclo-select"></select>
+      <button id="trk-new-ciclo-btn" class="trk-new-btn">+ Nuevo ciclo</button>
+    </div>
+
     <!-- Dashboard cards -->
     <div id="trk-dash" class="trk-dash"></div>
 
@@ -1399,6 +1455,51 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Modal: nuevo ciclo 12 semanas -->
+<div id="trk-ciclo-modal" class="trk-modal-overlay" style="display:none">
+  <div class="trk-modal">
+    <div class="trk-modal-head">
+      <h3>&#127942; Nuevo Ciclo de 12 Semanas</h3>
+      <button id="trk-ciclo-modal-close" class="trk-modal-close">&#10005;</button>
+    </div>
+    <div class="trk-modal-body">
+
+      <div class="trk-form-section">Datos del ciclo</div>
+      <div class="trk-form-row">
+        <div class="trk-form-group" style="flex:2;min-width:200px">
+          <label>Nombre del ciclo *</label>
+          <input id="trk-ciclo-nombre" type="text" placeholder="Ej: Mi Año de 12 Semanas #2">
+        </div>
+      </div>
+      <div class="trk-form-row">
+        <div class="trk-form-group">
+          <label>Fecha inicio *</label>
+          <input id="trk-ciclo-inicio" type="date">
+        </div>
+        <div class="trk-form-group">
+          <label>Fecha fin <span style="font-weight:400;color:#444">(auto-calcula)</span></label>
+          <input id="trk-ciclo-fin" type="date">
+        </div>
+      </div>
+      <div class="trk-form-row">
+        <div class="trk-form-group" style="min-width:100%">
+          <label>Visión del ciclo</label>
+          <textarea id="trk-ciclo-vision" placeholder="¿Qué quieres lograr al final de estas 12 semanas?"></textarea>
+        </div>
+      </div>
+
+      <div class="trk-form-section">Metas</div>
+      <div id="trk-mcards"></div>
+      <button type="button" id="trk-add-meta" class="trk-add-meta-btn">&#43; Agregar meta</button>
+
+    </div>
+    <div class="trk-modal-foot">
+      <button type="button" id="trk-ciclo-cancel" class="trk-btn-cancel">Cancelar</button>
+      <button type="button" id="trk-ciclo-save" class="trk-btn-primary">Crear ciclo</button>
+    </div>
   </div>
 </div>
 
@@ -3398,14 +3499,21 @@
 
         // ── TRACKER: Mi Año de 12 Semanas ────────────────────────────────────
 
-        let trkDashData = null;   // last /tracker/dashboard response
-        let trkWeekNum  = null;
-        let trkInitDone = false;
-        const TRK_DAYS  = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        let trkDashData        = null;
+        let trkWeekNum         = null;
+        let trkInitDone        = false;
+        let trkSelectedCicloId = null;
+        let trkMetaCount       = 0;
+        const TRK_DAYS         = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        function trkUrl(path) {
+            return trkSelectedCicloId ? `${path}?ciclo_id=${trkSelectedCicloId}` : path;
+        }
 
         function initTrackerTab() {
             if (!trkInitDone) {
                 trkInitDone = true;
+
                 $('#trk-rev-btn').on('click', function() {
                     $('#trk-rev-panel').toggle();
                     if ($('#trk-rev-panel').is(':visible')) loadTrkRevision();
@@ -3432,12 +3540,193 @@
                 $('#trk-prox-input').on('keydown', function(e) {
                     if (e.key === 'Enter') $('#trk-prox-add').click();
                 });
+
+                // Ciclo switcher
+                $('#trk-ciclo-select').on('change', function() {
+                    trkSelectedCicloId = parseInt($(this).val()) || null;
+                    trkWeekNum = null;
+                    renderTrkDash();
+                });
+                $('#trk-new-ciclo-btn').on('click', openCicloModal);
+
+                // Modal controls
+                $('#trk-ciclo-modal-close, #trk-ciclo-cancel').on('click', closeCicloModal);
+                $('#trk-ciclo-modal').on('click', function(e) {
+                    if (e.target === this) closeCicloModal();
+                });
+                $('#trk-add-meta').on('click', addMetaCard);
+                $('#trk-ciclo-save').on('click', saveNewCiclo);
+
+                // Auto-calcular fecha fin (12 semanas = 83 días desde inicio)
+                $('#trk-ciclo-inicio').on('change', function() {
+                    if (!this.value) return;
+                    const d = new Date(this.value + 'T00:00:00');
+                    d.setDate(d.getDate() + 83);
+                    $('#trk-ciclo-fin').val(d.toISOString().split('T')[0]);
+                });
             }
-            renderTrkDash();
+            loadTrkCiclos();
+        }
+
+        function loadTrkCiclos() {
+            fetch('/tracker/ciclos')
+                .then(r => r.json())
+                .then(ciclos => {
+                    if (!Array.isArray(ciclos) || !ciclos.length) return;
+                    const $sel = $('#trk-ciclo-select').empty();
+                    // If no ciclo selected yet, default to first (most recent)
+                    if (!trkSelectedCicloId) trkSelectedCicloId = ciclos[0].id;
+                    ciclos.forEach(c => {
+                        const sem = Math.round(((new Date(c.fecha_fin) - new Date(c.fecha_inicio)) / 86400000 + 6) / 7);
+                        $sel.append($('<option>').val(c.id)
+                            .text(`${c.nombre} (${c.fecha_inicio} → ${c.fecha_fin}, ${sem} sem)`)
+                            .prop('selected', c.id === trkSelectedCicloId));
+                    });
+                    renderTrkDash();
+                })
+                .catch(e => console.error('loadTrkCiclos:', e));
+        }
+
+        // ── Modal: nuevo ciclo ──────────────────────────────────────────────
+
+        function openCicloModal() {
+            trkMetaCount = 0;
+            $('#trk-ciclo-nombre').val('');
+            $('#trk-ciclo-inicio').val('');
+            $('#trk-ciclo-fin').val('');
+            $('#trk-ciclo-vision').val('');
+            $('#trk-mcards').empty();
+            $('#trk-ciclo-save').prop('disabled', false).text('Crear ciclo');
+            addMetaCard();   // start with one empty meta
+            $('#trk-ciclo-modal').fadeIn(150);
+        }
+
+        function closeCicloModal() {
+            $('#trk-ciclo-modal').fadeOut(120);
+        }
+
+        function addMetaCard() {
+            trkMetaCount++;
+            const n = trkMetaCount;
+            const $card = $(`<div class="trk-mcard">
+                <div class="trk-mcard-head">
+                    <span class="trk-mcard-num">Meta ${n}</span>
+                    <button type="button" class="trk-mcard-del" title="Eliminar meta">&#10005;</button>
+                </div>
+                <div class="trk-form-row">
+                    <div class="trk-form-group" style="flex:2;min-width:180px">
+                        <label>Nombre *</label>
+                        <input class="trk-m-nombre" type="text" placeholder="Ej: Certificación CCSA">
+                    </div>
+                    <div class="trk-form-group" style="min-width:120px">
+                        <label>Nivel</label>
+                        <select class="trk-m-nivel">
+                            <option value="compromiso">Compromiso</option>
+                            <option value="coccion">Cocción</option>
+                            <option value="hobby">Hobby</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="trk-form-row">
+                    <div class="trk-form-group" style="flex:2;min-width:180px">
+                        <label>Resultado medible</label>
+                        <input class="trk-m-resultado" type="text" placeholder="Ej: Aprobar examen con ≥75%">
+                    </div>
+                    <div class="trk-form-group" style="min-width:120px">
+                        <label>Fecha límite</label>
+                        <input class="trk-m-fecha" type="date">
+                    </div>
+                </div>
+                <div class="trk-tac-sub">Tácticas semanales</div>
+                <div class="trk-tacs"></div>
+                <button type="button" class="trk-add-tac">+ Agregar táctica</button>
+            </div>`);
+
+            $card.find('.trk-mcard-del').on('click', function() { $card.remove(); });
+            $card.find('.trk-add-tac').on('click', function() { addTacRow($card.find('.trk-tacs')); });
+
+            $('#trk-mcards').append($card);
+            addTacRow($card.find('.trk-tacs'));  // 1 táctica vacía por defecto
+        }
+
+        function addTacRow($container) {
+            const $row = $(`<div class="trk-tac-item">
+                <input type="text" placeholder="Descripción de la táctica">
+                <input type="number" min="1" max="7" value="1" title="Veces por semana">
+                <span style="font-size:0.68rem;color:#555;white-space:nowrap">/sem</span>
+                <button type="button" class="trk-tac-del" title="Eliminar">&#10005;</button>
+            </div>`);
+            $row.find('.trk-tac-del').on('click', function() { $row.remove(); });
+            $container.append($row);
+        }
+
+        async function saveNewCiclo() {
+            const nombre = $('#trk-ciclo-nombre').val().trim();
+            const inicio = $('#trk-ciclo-inicio').val();
+            const fin    = $('#trk-ciclo-fin').val();
+            const vision = $('#trk-ciclo-vision').val().trim();
+
+            if (!nombre) { $('#trk-ciclo-nombre').focus(); return; }
+            if (!inicio || !fin) { alert('Ingresa las fechas de inicio y fin.'); return; }
+
+            const $btn = $('#trk-ciclo-save').prop('disabled', true).text('Guardando…');
+
+            try {
+                // 1. Crear ciclo
+                const cicloRes = await fetch('/tracker/ciclo', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({nombre, fecha_inicio: inicio, fecha_fin: fin, vision})
+                }).then(r => r.json());
+                if (cicloRes.error) throw new Error(cicloRes.error);
+                const cicloId = cicloRes.id;
+
+                // 2. Crear metas + tácticas
+                for (const metaEl of $('#trk-mcards .trk-mcard').toArray()) {
+                    const $m = $(metaEl);
+                    const metaNombre = $m.find('.trk-m-nombre').val().trim();
+                    if (!metaNombre) continue;
+
+                    const metaRes = await fetch('/tracker/meta', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({
+                            ciclo_id: cicloId,
+                            nombre: metaNombre,
+                            nivel: $m.find('.trk-m-nivel').val(),
+                            resultado_medible: $m.find('.trk-m-resultado').val().trim(),
+                            fecha_limite: $m.find('.trk-m-fecha').val() || null
+                        })
+                    }).then(r => r.json());
+                    if (metaRes.error) throw new Error(metaRes.error);
+
+                    for (const tacEl of $m.find('.trk-tac-item').toArray()) {
+                        const $t   = $(tacEl);
+                        const desc = $t.find('input[type="text"]').val().trim();
+                        const freq = parseInt($t.find('input[type="number"]').val()) || 1;
+                        if (!desc) continue;
+                        await fetch('/tracker/tactica', {
+                            method: 'POST',
+                            headers: {'Content-Type':'application/json'},
+                            body: JSON.stringify({meta_id: metaRes.id, descripcion: desc, frecuencia_semanal: freq})
+                        });
+                    }
+                }
+
+                // 3. Activar nuevo ciclo y recargar
+                trkSelectedCicloId = cicloId;
+                trkWeekNum = null;
+                closeCicloModal();
+                loadTrkCiclos();
+
+            } catch(e) {
+                alert('Error al guardar: ' + e.message);
+                $btn.prop('disabled', false).text('Crear ciclo');
+            }
         }
 
         function renderTrkDash() {
-            fetch('/tracker/dashboard')
+            fetch(trkUrl('/tracker/dashboard'))
                 .then(r => r.json())
                 .then(d => {
                     if (d.error) { console.error('tracker dash:', d.error); return; }
@@ -3485,7 +3774,7 @@
         function loadTrkWeek(num) {
             trkWeekNum = num;
             const total = trkDashData ? trkDashData.total_semanas : 12;
-            fetch(`/tracker/semana/${num}`)
+            fetch(trkUrl(`/tracker/semana/${num}`))
                 .then(r => r.json())
                 .then(data => {
                     if (data.error) { console.error('tracker week:', data.error); return; }
@@ -3608,7 +3897,7 @@
         }
 
         function loadTrkRevision() {
-            fetch('/tracker/revision')
+            fetch(trkUrl('/tracker/revision'))
                 .then(r => r.json())
                 .then(d => {
                     if (d.error) { console.error('revision:', d.error); return; }

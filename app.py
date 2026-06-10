@@ -702,11 +702,14 @@ def _jd(obj):
     if isinstance(obj, list):   return [_jd(x) for x in obj]
     return obj
 
-def _ciclo_actual(cur):
-    cur.execute("SELECT * FROM ciclos ORDER BY id DESC LIMIT 1")
+def _ciclo_actual(cur, ciclo_id=None):
+    if ciclo_id:
+        cur.execute("SELECT * FROM ciclos WHERE id=%s", (ciclo_id,))
+    else:
+        cur.execute("SELECT * FROM ciclos ORDER BY id DESC LIMIT 1")
     row = cur.fetchone()
     if row:
-        row['semanas_totales'] = max(1, (row['fecha_fin'] - row['fecha_inicio']).days // 7)
+        row['semanas_totales'] = max(1, ((row['fecha_fin'] - row['fecha_inicio']).days + 6) // 7)
     return row
 
 def _week_score(cur, ciclo_id, fi, n):
@@ -808,6 +811,20 @@ def init_tracker_db():
         _seed_tracker(cur, conn)
     cur.close(); conn.close()
 
+@app.route('/tracker/ciclos')
+def tracker_lista_ciclos():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, nombre, fecha_inicio, fecha_fin FROM ciclos ORDER BY id DESC")
+        rows = cur.fetchall()
+        for r in rows:
+            r['fecha_inicio'] = r['fecha_inicio'].isoformat()
+            r['fecha_fin']    = r['fecha_fin'].isoformat()
+        cur.close(); conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/tracker/ciclo/actual')
 def tracker_ciclo_actual():
     try:
@@ -877,8 +894,9 @@ def tracker_ejecucion():
 @app.route('/tracker/semana/<int:numero>')
 def tracker_semana(numero):
     try:
+        ciclo_id = request.args.get('ciclo_id', type=int)
         conn = get_db(); cur = conn.cursor(dictionary=True)
-        ciclo = _ciclo_actual(cur)
+        ciclo = _ciclo_actual(cur, ciclo_id)
         if not ciclo: return jsonify({'error': 'Sin ciclo'}), 404
         fi    = ciclo['fecha_inicio']
         start = fi + timedelta(days=(numero-1)*7)
@@ -920,8 +938,9 @@ def tracker_semana(numero):
 @app.route('/tracker/dashboard')
 def tracker_dashboard():
     try:
+        ciclo_id = request.args.get('ciclo_id', type=int)
         conn = get_db(); cur = conn.cursor(dictionary=True)
-        ciclo = _ciclo_actual(cur)
+        ciclo = _ciclo_actual(cur, ciclo_id)
         if not ciclo: return jsonify({'error': 'Sin ciclo'}), 404
         fi, ff = ciclo['fecha_inicio'], ciclo['fecha_fin']
         hoy = date.today()
@@ -991,8 +1010,9 @@ def tracker_proximos_del(pid):
 @app.route('/tracker/revision', methods=['GET'])
 def tracker_revision_get():
     try:
+        ciclo_id = request.args.get('ciclo_id', type=int)
         conn = get_db(); cur = conn.cursor(dictionary=True)
-        ciclo = _ciclo_actual(cur)
+        ciclo = _ciclo_actual(cur, ciclo_id)
         if not ciclo: return jsonify([])
         fi = ciclo['fecha_inicio']; hoy = date.today()
         semana_actual = max(1, min(ciclo['semanas_totales'], (hoy - fi).days // 7 + 1))
