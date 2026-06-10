@@ -654,6 +654,29 @@ def api_libros():
         return jsonify({"errors": str(e)}), 500
 
 
+@app.route('/api/practicas/talleres')
+def api_practicas_talleres():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, nombre FROM practica_grupos ORDER BY orden")
+        grupos = cur.fetchall()
+        result = []
+        for g in grupos:
+            cur.execute("""SELECT id, slug, titulo, descripcion, orden
+                           FROM practica_talleres WHERE grupo_id=%s ORDER BY orden""", (g['id'],))
+            talleres = cur.fetchall()
+            for t in talleres:
+                cur.execute("""SELECT num, titulo, study_id, chapter_id
+                               FROM practica_lecciones WHERE taller_id=%s ORDER BY orden""", (t['id'],))
+                t['lecciones'] = cur.fetchall()
+                t['grupo_nombre'] = g['nombre']
+            result.extend(talleres)
+        cur.close(); conn.close()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/proxy/study/<study_id>')
 def proxy_study(study_id):
     import urllib.request

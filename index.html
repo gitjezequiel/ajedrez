@@ -3138,7 +3138,7 @@
         // PRÁCTICAS
         // =====================================================================
         const PRAC_STUDY_ID = 'uYSaJEgT';
-        const PRACTICAS_SETS = [{
+        let PRACTICAS_SETS = [{
             id: 'mates-30',
             tipo: 'patrones',
             grupo: null,
@@ -3177,19 +3177,7 @@
                 { num: 30, nombre: 'Vukovic',             teoria: 'IXbbaK1T', ejercicio: '8gy1Tf1v' }
             ]
         },
-        // ── Taller de Tácticas ──────────────────────────────────────────────
-        {
-            id: 'taller-clavadas',
-            tipo: 'taller',
-            grupo: 'Taller de Tácticas',
-            titulo: 'Clavadas',
-            descripcion: '3 estudios sobre el arte de la clavada (pin)',
-            lecciones: [
-                { num: 1, titulo: 'Ejercicio 6 — Clavada',       studyId: 'TUsg6DaQ', chapterId: 'YwFkPk8B' },
-                { num: 2, titulo: 'Ejercicios de clavada — Cap. 2', studyId: '3m8mhJQp', chapterId: 'oFs50pTU' },
-                { num: 3, titulo: 'Ejemplo de clavada',           studyId: 'QXNvS4ek', chapterId: 'lS9QQ2ou' }
-            ]
-        }
+        // talleres se cargan desde /api/practicas/talleres al init
         ];
 
         let pracNavLevel      = 'sets';
@@ -3549,7 +3537,31 @@
 
         function initPracticasSection() {
             initPracBoard();
-            if (pracNavLevel === 'sets') showPracSets();
+            // Cargar talleres desde la DB, luego mostrar sets
+            fetch('/api/practicas/talleres')
+                .then(r => r.json())
+                .then(talleres => {
+                    PRACTICAS_SETS = PRACTICAS_SETS.filter(s => s.tipo !== 'taller');
+                    talleres.forEach(t => {
+                        PRACTICAS_SETS.push({
+                            id: `taller-${t.slug}`,
+                            tipo: 'taller',
+                            grupo: t.grupo_nombre,
+                            titulo: t.titulo,
+                            descripcion: t.descripcion,
+                            lecciones: t.lecciones.map(l => ({
+                                num:       l.num,
+                                titulo:    l.titulo,
+                                studyId:   l.study_id,
+                                chapterId: l.chapter_id
+                            }))
+                        });
+                    });
+                })
+                .catch(() => {})
+                .finally(() => {
+                    if (pracNavLevel === 'sets') showPracSets();
+                });
         }
 
         // Nav buttons
