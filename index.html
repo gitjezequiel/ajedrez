@@ -3610,7 +3610,7 @@
 
         $('#btn-prac-load-chapters').on('click', async function() {
             const url = $('#prac-add-url').val().trim();
-            const match = url.match(/lichess\.org\/study\/([A-Za-z0-9]{6,12})/);
+            const match = url.match(/lichess\.org\/study\/([A-Za-z0-9]{4,12})/);
             if (!match) {
                 alert('URL inválida. Usa el formato: https://lichess.org/study/XXXXXXXX/');
                 return;
@@ -3619,10 +3619,34 @@
             const $btn = $(this);
             $btn.prop('disabled', true).text('Cargando...');
             try {
-                const res = await fetch(`/api/lichess-study/${studyId}/chapters`);
-                const chapters = await res.json();
-                if (!Array.isArray(chapters) || !chapters.length) {
-                    alert('No se encontraron capítulos en ese estudio.');
+                const res = await fetch(`/proxy/lichess-study/${studyId}`);
+                const data = await res.json();
+                const pgn = data.data && data.data.pgn;
+                if (!pgn) throw new Error('Sin PGN');
+
+                // Parsear capítulos del PGN completo del estudio
+                const games = splitPgn(pgn);
+                const chapters = [];
+                games.forEach((gamePgn, i) => {
+                    let titulo = `Capítulo ${i + 1}`;
+                    let chapterId = null;
+                    for (const line of gamePgn.split('\n')) {
+                        const l = line.trim();
+                        if (l.startsWith('[Event "') && l.length > 10) {
+                            const ev = l.slice(8, -2);
+                            if (ev && ev !== '?') titulo = ev;
+                        }
+                        if (l.startsWith('[Site "') && l.includes('/study/')) {
+                            const siteUrl = l.slice(7, -2).replace(/\/$/, '');
+                            const cid = siteUrl.split('/').pop();
+                            if (cid && cid.length >= 6 && cid !== studyId) chapterId = cid;
+                        }
+                    }
+                    if (chapterId) chapters.push({ num: i + 1, id: chapterId, titulo });
+                });
+
+                if (!chapters.length) {
+                    alert('No se encontraron capítulos. Verifica que el estudio sea público.');
                     return;
                 }
                 const $list = $('#prac-add-chapters').empty();
@@ -3637,7 +3661,7 @@
                 $('#prac-add-save').show();
                 $btn.text('Recargar');
             } catch(e) {
-                alert('Error al conectar con Lichess.');
+                alert('Error al cargar el estudio: ' + e.message);
             }
             $btn.prop('disabled', false);
         });
