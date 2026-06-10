@@ -3185,6 +3185,7 @@
         let pracCurrentTaller = null;
         let pracCurrentPatron = null;
         let pracCurrentLeccion = null;
+        let pracProgresoSet   = new Set();
         let pracCurrentMode  = 'ejercicio';
         let pracBoardInst    = null;
         let pracBoardReady   = false;
@@ -3385,6 +3386,33 @@
 
         function showPracFeedback(type, html) {
             $('#prac-feedback').show().attr('class', type).html(html);
+            if (type === 'done') {
+                const doneId = pracCurrentLeccion ? pracCurrentLeccion.chapterId
+                             : pracCurrentPatron  ? pracCurrentPatron.ejercicio
+                             : null;
+                if (doneId && !pracProgresoSet.has(doneId)) {
+                    pracProgresoSet.add(doneId);
+                    fetch(`/api/progreso/${doneId}`, { method: 'POST' }).catch(() => {});
+                }
+            }
+        }
+
+        function togglePracProgreso(id, $card) {
+            fetch(`/api/progreso/${id}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) return;
+                    const $btn = $card.find('.prac-done-btn');
+                    if (data.visto) {
+                        pracProgresoSet.add(id);
+                        $btn.text('✓').css('color', '#00b894');
+                        $card.css('opacity', '0.55');
+                    } else {
+                        pracProgresoSet.delete(id);
+                        $btn.text('○').css('color', '#636e72');
+                        $card.css('opacity', '1');
+                    }
+                });
         }
 
         function showPracSets() {
@@ -3435,15 +3463,20 @@
             $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
             const $list = $('#prac-patterns-list').empty();
             taller.lecciones.forEach(l => {
-                const $card = $(`<div class="exercise-card" style="cursor:pointer;">
-                    <div class="exercise-num">${l.num}</div>
-                    <div style="flex:1;">
+                const done = pracProgresoSet.has(l.chapterId);
+                const $card = $(`<div class="exercise-card" style="${done ? 'opacity:0.6;' : ''}">
+                    <div class="exercise-num" style="cursor:pointer;">${l.num}</div>
+                    <div style="flex:1;cursor:pointer;">
                         <div class="exercise-name">${l.titulo}</div>
-                        <div class="exercise-moves">Lichess · estudio ${l.studyId}</div>
+                        <div class="exercise-moves">Lichess · ${l.studyId}</div>
                     </div>
-                    <i class="fas fa-chevron-right" style="color:#636e72;margin-left:auto;"></i>
+                    <button class="prac-done-btn" data-id="${l.chapterId}"
+                        style="background:none;border:none;cursor:pointer;font-size:1.15rem;padding:4px 8px;min-width:30px;color:${done ? '#00b894' : '#636e72'};"
+                        title="${done ? 'Marcar pendiente' : 'Marcar completado'}">${done ? '✓' : '○'}</button>
+                    <i class="fas fa-chevron-right" style="color:#636e72;margin-left:4px;"></i>
                 </div>`);
-                $card.on('click', () => openPracLeccion(l));
+                $card.find('.exercise-num, div[style*="cursor:pointer"]').on('click', () => openPracLeccion(l));
+                $card.find('.prac-done-btn').on('click', e => { e.stopPropagation(); togglePracProgreso(l.chapterId, $card); });
                 $card.appendTo($list);
             });
         }
@@ -3483,15 +3516,20 @@
             } else {
                 $('#prac-patterns-label').text(`${set.patrones.length} Patrones de Jaque Mate`);
                 set.patrones.forEach(p => {
-                    const $card = $(`<div class="exercise-card" style="cursor:pointer;">
-                        <div class="exercise-num">${p.num}</div>
-                        <div style="flex:1;">
+                    const done = pracProgresoSet.has(p.ejercicio);
+                    const $card = $(`<div class="exercise-card" style="${done ? 'opacity:0.6;' : ''}">
+                        <div class="exercise-num" style="cursor:pointer;">${p.num}</div>
+                        <div style="flex:1;cursor:pointer;">
                             <div class="exercise-name">${p.nombre}</div>
                             <div class="exercise-moves">Mate de ${p.nombre}</div>
                         </div>
-                        <i class="fas fa-chevron-right" style="color:#636e72;margin-left:auto;"></i>
+                        <button class="prac-done-btn" data-id="${p.ejercicio}"
+                            style="background:none;border:none;cursor:pointer;font-size:1.15rem;padding:4px 8px;min-width:30px;color:${done ? '#00b894' : '#636e72'};"
+                            title="${done ? 'Marcar pendiente' : 'Marcar completado'}">${done ? '✓' : '○'}</button>
+                        <i class="fas fa-chevron-right" style="color:#636e72;margin-left:4px;"></i>
                     </div>`);
-                    $card.on('click', () => openPracPatron(p));
+                    $card.find('.exercise-num, div[style*="cursor:pointer"]').on('click', () => openPracPatron(p));
+                    $card.find('.prac-done-btn').on('click', e => { e.stopPropagation(); togglePracProgreso(p.ejercicio, $card); });
                     $card.appendTo($list);
                 });
             }
@@ -3689,7 +3727,7 @@
 
         function initPracticasSection() {
             initPracBoard();
-            // Cargar talleres desde la DB, luego mostrar sets
+            fetch('/api/progreso').then(r => r.json()).then(ids => { pracProgresoSet = new Set(ids); }).catch(() => {});
             reloadPracTalleresData()
                 .finally(() => {
                     if (pracNavLevel === 'sets') showPracSets();
