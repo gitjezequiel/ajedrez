@@ -8,6 +8,7 @@ import base64
 import chess
 import PIL.Image
 import mysql.connector
+from datetime import date, timedelta
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from google import genai
@@ -690,6 +691,343 @@ def proxy_lichess_chapter(study_id, chapter_id):
     return jsonify({'data': {'pgn': pgn}})
 
 
+# =====================================================================
+# TRACKER — Mi Año de 12 Semanas
+# =====================================================================
+
+def _jd(obj):
+    """Convierte date objects a ISO strings para JSON (recursivo)."""
+    if isinstance(obj, date):   return obj.isoformat()
+    if isinstance(obj, dict):   return {k: _jd(v) for k, v in obj.items()}
+    if isinstance(obj, list):   return [_jd(x) for x in obj]
+    return obj
+
+def _ciclo_actual(cur):
+    cur.execute("SELECT * FROM ciclos ORDER BY id DESC LIMIT 1")
+    row = cur.fetchone()
+    if row:
+        row['semanas_totales'] = max(1, (row['fecha_fin'] - row['fecha_inicio']).days // 7)
+    return row
+
+def _week_score(cur, ciclo_id, fi, n):
+    start = fi + timedelta(days=(n-1)*7)
+    end   = fi + timedelta(days=n*7 - 1)
+    cur.execute("""
+        SELECT t.frecuencia_semanal, COUNT(e.id) as c
+        FROM tacticas t
+        JOIN metas m ON t.meta_id = m.id
+        LEFT JOIN ejecuciones e ON e.tactica_id = t.id AND e.fecha BETWEEN %s AND %s
+        WHERE m.ciclo_id = %s AND m.activa = 1
+        GROUP BY t.id, t.frecuencia_semanal
+    """, (start, end, ciclo_id))
+    rows = cur.fetchall()
+    if not rows: return 0.0
+    esp   = sum(r['frecuencia_semanal'] for r in rows)
+    hecho = sum(min(r['c'], r['frecuencia_semanal']) for r in rows)
+    return round(hecho / esp * 100, 2) if esp else 0.0
+
+def _streak(cur):
+    hoy = date.today()
+    streak, d = 0, hoy
+    for _ in range(365):
+        cur.execute("SELECT COUNT(*) as c FROM ejecuciones WHERE fecha = %s", (d,))
+        if cur.fetchone()['c'] == 0: break
+        streak += 1
+        d -= timedelta(days=1)
+    return streak
+
+def _seed_tracker(cur, conn):
+    cur.execute("""INSERT INTO ciclos (nombre, fecha_inicio, fecha_fin, vision) VALUES (%s,%s,%s,%s)""",
+        ('Primer Año de 12 Semanas', '2026-06-10', '2026-09-01',
+         'Certificado CCSA en mano + base sólida de ajedrez + Nahual avanzando'))
+    conn.commit()
+    cid = cur.lastrowid
+
+    def meta(nombre, nivel, resultado, flim=None):
+        cur.execute("INSERT INTO metas (ciclo_id,nombre,nivel,resultado_medible,fecha_limite) VALUES (%s,%s,%s,%s,%s)",
+                    (cid, nombre, nivel, resultado, flim))
+        conn.commit()
+        return cur.lastrowid
+
+    def tacs(mid, lst):
+        cur.executemany("INSERT INTO tacticas (meta_id,descripcion,frecuencia_semanal) VALUES (%s,%s,%s)",
+                        [(mid, d, f) for d, f in lst])
+        conn.commit()
+
+    m1 = meta('Certificación CCSA R82', 'compromiso',
+               'Aprobar examen el 15 de julio 2026', '2026-07-15')
+    tacs(m1, [('Sesión de estudio CCSA 1 hora', 4), ('Simulacro de examen', 1)])
+
+    m2 = meta('Ajedrez 700→850 ELO', 'compromiso',
+               'Llegar a 850 ELO y terminar 10 partidas de Logical Chess')
+    tacs(m2, [('Puzzles diarios 15-20 min', 6), ('Partida de Chernev estudiada', 2),
+               ('Clase de ajedrez + repaso de apuntes', 1), ('Partida propia analizada', 1)])
+
+    m3 = meta('Nahual: Espíritu Protector', 'coccion', '12 capítulos revisados y publicados')
+    tacs(m3, [('Capítulo revisado y publicado', 1)])
+
+def init_tracker_db():
+    conn = get_db()
+    cur  = conn.cursor(dictionary=True)
+    cur.execute("""CREATE TABLE IF NOT EXISTS ciclos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(200), fecha_inicio DATE, fecha_fin DATE, vision TEXT
+    )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS metas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ciclo_id INT, nombre VARCHAR(200), descripcion TEXT,
+        nivel ENUM('compromiso','coccion','hobby'),
+        resultado_medible TEXT, fecha_limite DATE NULL,
+        activa BOOLEAN DEFAULT TRUE,
+        FOREIGN KEY (ciclo_id) REFERENCES ciclos(id)
+    )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS tacticas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        meta_id INT, descripcion VARCHAR(300), frecuencia_semanal INT,
+        FOREIGN KEY (meta_id) REFERENCES metas(id)
+    )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS ejecuciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tactica_id INT, fecha DATE, completada BOOLEAN DEFAULT TRUE,
+        UNIQUE KEY uk_tac_fecha (tactica_id, fecha),
+        FOREIGN KEY (tactica_id) REFERENCES tacticas(id)
+    )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS revision_semanal (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ciclo_id INT, numero_semana INT,
+        puntaje DECIMAL(5,2), notas TEXT,
+        FOREIGN KEY (ciclo_id) REFERENCES ciclos(id)
+    )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS proximos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        descripcion VARCHAR(300), fecha_creacion DATE
+    )""")
+    conn.commit()
+    cur.execute("SELECT COUNT(*) as c FROM ciclos")
+    if cur.fetchone()['c'] == 0:
+        _seed_tracker(cur, conn)
+    cur.close(); conn.close()
+
+@app.route('/tracker/ciclo/actual')
+def tracker_ciclo_actual():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        ciclo = _ciclo_actual(cur)
+        if not ciclo: return jsonify(None)
+        cur.execute("SELECT * FROM metas WHERE ciclo_id=%s AND activa=1 ORDER BY id", (ciclo['id'],))
+        metas = cur.fetchall()
+        for m in metas:
+            cur.execute("SELECT id,descripcion,frecuencia_semanal FROM tacticas WHERE meta_id=%s ORDER BY id", (m['id'],))
+            m['tacticas'] = cur.fetchall()
+        ciclo['metas'] = metas
+        cur.close(); conn.close()
+        return jsonify(_jd(ciclo))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/ciclo', methods=['POST'])
+def tracker_crear_ciclo():
+    try:
+        d = request.json; conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("INSERT INTO ciclos (nombre,fecha_inicio,fecha_fin,vision) VALUES (%s,%s,%s,%s)",
+                    (d['nombre'], d['fecha_inicio'], d['fecha_fin'], d.get('vision','')))
+        conn.commit(); cid = cur.lastrowid; cur.close(); conn.close()
+        return jsonify({'id': cid})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/meta', methods=['POST'])
+def tracker_crear_meta():
+    try:
+        d = request.json; conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("INSERT INTO metas (ciclo_id,nombre,nivel,resultado_medible,fecha_limite) VALUES (%s,%s,%s,%s,%s)",
+                    (d['ciclo_id'], d['nombre'], d['nivel'], d.get('resultado_medible',''), d.get('fecha_limite')))
+        conn.commit(); mid = cur.lastrowid; cur.close(); conn.close()
+        return jsonify({'id': mid})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/tactica', methods=['POST'])
+def tracker_crear_tactica():
+    try:
+        d = request.json; conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("INSERT INTO tacticas (meta_id,descripcion,frecuencia_semanal) VALUES (%s,%s,%s)",
+                    (d['meta_id'], d['descripcion'], d['frecuencia_semanal']))
+        conn.commit(); tid = cur.lastrowid; cur.close(); conn.close()
+        return jsonify({'id': tid})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/ejecucion', methods=['POST'])
+def tracker_ejecucion():
+    try:
+        d = request.json; tid, fecha = d['tactica_id'], d['fecha']
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id FROM ejecuciones WHERE tactica_id=%s AND fecha=%s", (tid, fecha))
+        row = cur.fetchone()
+        if row:
+            cur.execute("DELETE FROM ejecuciones WHERE id=%s", (row['id'],)); completada = False
+        else:
+            cur.execute("INSERT INTO ejecuciones (tactica_id,fecha) VALUES (%s,%s)", (tid, fecha)); completada = True
+        conn.commit(); cur.close(); conn.close()
+        return jsonify({'completada': completada})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/semana/<int:numero>')
+def tracker_semana(numero):
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        ciclo = _ciclo_actual(cur)
+        if not ciclo: return jsonify({'error': 'Sin ciclo'}), 404
+        fi    = ciclo['fecha_inicio']
+        start = fi + timedelta(days=(numero-1)*7)
+        end   = fi + timedelta(days=numero*7 - 1)
+        dias  = [(start + timedelta(days=i)).isoformat() for i in range(7)]
+
+        cur.execute("""
+            SELECT t.id, t.descripcion, t.frecuencia_semanal,
+                   m.id as meta_id, m.nombre as meta_nombre, m.nivel as meta_nivel
+            FROM tacticas t JOIN metas m ON t.meta_id = m.id
+            WHERE m.ciclo_id=%s AND m.activa=1 ORDER BY m.id, t.id
+        """, (ciclo['id'],))
+        tacs = cur.fetchall()
+
+        cur.execute("""
+            SELECT e.tactica_id, e.fecha FROM ejecuciones e
+            JOIN tacticas t ON e.tactica_id = t.id
+            JOIN metas m    ON t.meta_id    = m.id
+            WHERE m.ciclo_id=%s AND e.fecha BETWEEN %s AND %s
+        """, (ciclo['id'], start, end))
+        exec_set = {(r['tactica_id'], r['fecha'].isoformat()) for r in cur.fetchall()}
+
+        total_esp = total_hecho = 0
+        result = []
+        for t in tacs:
+            ejs = [d for d in dias if (t['id'], d) in exec_set]
+            c, f = len(ejs), t['frecuencia_semanal']
+            total_esp += f; total_hecho += min(c, f)
+            result.append({**t, 'completadas': c, 'ejecuciones': ejs})
+
+        puntaje = round(total_hecho / total_esp * 100, 2) if total_esp else 0.0
+        cur.close(); conn.close()
+        return jsonify({'semana': numero, 'fecha_inicio': start.isoformat(),
+                        'fecha_fin': end.isoformat(), 'dias': dias,
+                        'puntaje': puntaje, 'tacticas': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/dashboard')
+def tracker_dashboard():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        ciclo = _ciclo_actual(cur)
+        if not ciclo: return jsonify({'error': 'Sin ciclo'}), 404
+        fi, ff = ciclo['fecha_inicio'], ciclo['fecha_fin']
+        hoy = date.today()
+        semana_actual = max(1, min(12, (hoy - fi).days // 7 + 1))
+        dias_ciclo    = max(0, (ff - hoy).days)
+
+        cur.execute("""SELECT nombre, fecha_limite FROM metas
+            WHERE ciclo_id=%s AND activa=1 AND fecha_limite IS NOT NULL
+            ORDER BY fecha_limite LIMIT 1""", (ciclo['id'],))
+        dl = cur.fetchone()
+        dias_deadline = max(0, (dl['fecha_limite'] - hoy).days) if dl else None
+        meta_deadline = dl['nombre'] if dl else None
+
+        puntaje_semana = _week_score(cur, ciclo['id'], fi, semana_actual)
+        scores   = [_week_score(cur, ciclo['id'], fi, w) for w in range(1, semana_actual + 1)]
+        promedio = round(sum(scores) / len(scores), 2) if scores else 0.0
+        racha    = _streak(cur)
+        cur.close(); conn.close()
+        return jsonify({
+            'ciclo_id': ciclo['id'],
+            'semana_actual': semana_actual, 'total_semanas': ciclo['semanas_totales'],
+            'dias_restantes_ciclo': dias_ciclo,
+            'dias_para_deadline': dias_deadline,
+            'meta_deadline_nombre': meta_deadline,
+            'puntaje_semana': puntaje_semana,
+            'puntaje_promedio': promedio,
+            'racha': racha,
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/proximos', methods=['GET'])
+def tracker_proximos_get():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id, descripcion, fecha_creacion FROM proximos ORDER BY id DESC")
+        rows = cur.fetchall(); hoy = date.today()
+        for r in rows:
+            r['dias'] = (hoy - r['fecha_creacion']).days
+            r['fecha_creacion'] = r['fecha_creacion'].isoformat()
+        cur.close(); conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/proximos', methods=['POST'])
+def tracker_proximos_add():
+    try:
+        d = request.json; conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("INSERT INTO proximos (descripcion,fecha_creacion) VALUES (%s,%s)",
+                    (d['descripcion'], date.today().isoformat()))
+        conn.commit(); pid = cur.lastrowid; cur.close(); conn.close()
+        return jsonify({'id': pid})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/proximos/<int:pid>', methods=['DELETE'])
+def tracker_proximos_del(pid):
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("DELETE FROM proximos WHERE id=%s", (pid,))
+        conn.commit(); cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/revision', methods=['GET'])
+def tracker_revision_get():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        ciclo = _ciclo_actual(cur)
+        if not ciclo: return jsonify([])
+        fi = ciclo['fecha_inicio']; hoy = date.today()
+        semana_actual = max(1, min(ciclo['semanas_totales'], (hoy - fi).days // 7 + 1))
+        rows = []
+        for w in range(1, semana_actual + 1):
+            puntaje = _week_score(cur, ciclo['id'], fi, w)
+            cur.execute("SELECT notas FROM revision_semanal WHERE ciclo_id=%s AND numero_semana=%s",
+                        (ciclo['id'], w))
+            rev = cur.fetchone()
+            rows.append({'numero': w, 'score': puntaje, 'notas': rev['notas'] if rev else ''})
+        cur.close(); conn.close()
+        return jsonify({'ciclo_id': ciclo['id'], 'semanas': rows})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tracker/revision', methods=['POST'])
+def tracker_revision():
+    try:
+        d = request.json; conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT id FROM revision_semanal WHERE ciclo_id=%s AND numero_semana=%s",
+                    (d['ciclo_id'], d['numero_semana']))
+        row = cur.fetchone()
+        if row:
+            cur.execute("UPDATE revision_semanal SET puntaje=%s,notas=%s WHERE id=%s",
+                        (d['puntaje'], d.get('notas',''), row['id']))
+        else:
+            cur.execute("INSERT INTO revision_semanal (ciclo_id,numero_semana,puntaje,notas) VALUES (%s,%s,%s,%s)",
+                        (d['ciclo_id'], d['numero_semana'], d['puntaje'], d.get('notas','')))
+        conn.commit(); cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
+    init_tracker_db()
     print("Servidor de Ajedrez con Gemini iniciado en http://localhost:5000")
     app.run(host='0.0.0.0', debug=True, port=5000)

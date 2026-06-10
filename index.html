@@ -992,6 +992,65 @@
             font-size: 0.8rem; font-weight: 600;
         }
         #note-modal-save-btn:hover { background: rgba(212,168,0,0.25); }
+
+        /* ── Tracker: Mi Año de 12 Semanas ───────────────────────────────── */
+        #section-tracker { padding: 16px 20px; overflow-y: auto; }
+        .trk-wrap { max-width: 1100px; margin: 0 auto; }
+        .trk-dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 12px; margin-bottom: 14px; }
+        .trk-card { padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; }
+        .trk-big { font-size: 2rem; font-weight: 700; color: #dfe6e9; line-height: 1.1; }
+        .trk-sub { font-size: 0.74rem; color: #636e72; margin-top: 2px; }
+        .trk-pbar { height: 5px; background: #2d3436; border-radius: 3px; margin-top: 8px; }
+        .trk-pfill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .6s; }
+        .trk-rule { padding: 10px 16px; border-left: 3px solid; border-radius: 6px; font-size: 0.85rem; margin-bottom: 14px; background: rgba(255,255,255,0.03); }
+        .trk-main { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+        .trk-checklist-wrap { flex: 1; min-width: 0; }
+        .trk-week-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .trk-week-nav button { background: #2d3436; border: none; color: #b2bec3; padding: 4px 14px; border-radius: 6px; cursor: pointer; }
+        .trk-week-nav button:hover:not(:disabled) { background: var(--accent); color: #fff; }
+        .trk-week-label { color: #dfe6e9; font-size: 0.88rem; flex: 1; text-align: center; }
+        .trk-days-header { display: flex; align-items: center; padding: 0 4px 4px; }
+        .trk-days-spacer { flex: 1; }
+        .trk-day-col { width: 36px; text-align: center; font-size: 0.65rem; font-weight: 600; color: #555; flex-shrink: 0; }
+        .trk-day-num { font-size: 0.58rem; color: #444; }
+        .trk-day-col.trk-today { color: var(--accent); }
+        .trk-count-hdr { width: 36px; }
+        .trk-meta-group { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+        .trk-meta-header { display: flex; align-items: center; gap: 8px; padding: 9px 14px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .trk-nivel-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 7px; border-radius: 4px; }
+        .trk-meta-nombre { font-size: 0.87rem; font-weight: 600; color: #dfe6e9; }
+        .trk-tac-row { display: flex; align-items: center; padding: 7px 14px; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .trk-tac-row:last-child { border-bottom: none; }
+        .trk-tac-desc { flex: 1; font-size: 0.81rem; color: #b2bec3; min-width: 0; padding-right: 6px; }
+        .trk-circles { display: flex; gap: 3px; flex-shrink: 0; }
+        .trk-circle { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); background: transparent; color: #555; transition: all .12s; user-select: none; flex-shrink: 0; }
+        .trk-circle:hover:not(.trk-future) { border-color: var(--accent); color: var(--accent); }
+        .trk-circle.done { background: #00b894; border-color: #00b894; color: #fff; }
+        .trk-circle.trk-future { opacity: 0.2; cursor: default; }
+        .trk-count { width: 34px; text-align: center; font-size: 0.75rem; color: #555; font-weight: 600; flex-shrink: 0; }
+        .trk-count.met { color: #00b894; }
+        .trk-prox-wrap { width: 260px; flex-shrink: 0; padding: 14px !important; }
+        .trk-prox-title { font-weight: 600; color: #dfe6e9; font-size: 0.88rem; margin-bottom: 10px; }
+        .trk-prox-row { display: flex; gap: 6px; margin-bottom: 10px; }
+        .trk-prox-row input { flex: 1; background: #2d3436; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 7px 10px; color: #fff; font-size: 0.8rem; }
+        .trk-prox-row button { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 7px 14px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+        .trk-prox-item { display: flex; align-items: center; gap: 6px; padding: 6px 2px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .trk-prox-item:last-child { border-bottom: none; }
+        .trk-prox-desc { flex: 1; font-size: 0.79rem; color: #b2bec3; }
+        .trk-prox-dias { font-size: 0.7rem; color: #555; white-space: nowrap; }
+        .trk-prox-del { background: none; border: none; color: #555; cursor: pointer; font-size: 0.75rem; padding: 2px 5px; border-radius: 3px; }
+        .trk-prox-del:hover { color: #e17055; }
+        .trk-rev-toggle { background: none; border: 1px solid rgba(255,255,255,0.1); color: #636e72; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-top: 16px; width: 100%; }
+        .trk-rev-toggle:hover { background: rgba(255,255,255,0.04); color: #b2bec3; }
+        #trk-rev-panel { display: none; margin-top: 10px; }
+        .trk-rev-table { width: 100%; border-collapse: collapse; font-size: 0.81rem; }
+        .trk-rev-table th { padding: 8px 10px; color: #636e72; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: center; }
+        .trk-rev-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #b2bec3; text-align: center; }
+        .trk-rev-table textarea { width: 100%; background: #2d3436; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #b2bec3; font-size: 0.78rem; padding: 4px 6px; resize: vertical; min-height: 36px; }
+        .trk-rev-save { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 3px 10px; cursor: pointer; font-size: 0.75rem; }
+        .sc-g { color: #00b894; font-weight: 600; }
+        .sc-y { color: #f0c000; font-weight: 600; }
+        .sc-r { color: #e17055; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -1004,6 +1063,7 @@
         <button class="tab-btn" data-tab="books"><i class="fas fa-book"></i> Libros</button>
         <button class="tab-btn" data-tab="courses" style="display:none"><i class="fas fa-graduation-cap"></i> Cursos</button>
         <button class="tab-btn" data-tab="practices"><i class="fas fa-dumbbell"></i> Prácticas</button>
+        <button class="tab-btn" data-tab="tracker"><i class="fas fa-calendar-alt"></i> 12 Semanas</button>
     </nav>
     <button id="btn-new-game"><i class="fas fa-plus"></i> Nueva Partida</button>
 </header>
@@ -1287,6 +1347,59 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- ══ Mi Año de 12 Semanas ══════════════════════════════════════════════ -->
+<div id="section-tracker" class="section panel" style="display:none">
+  <div class="trk-wrap">
+
+    <!-- Dashboard cards -->
+    <div id="trk-dash" class="trk-dash"></div>
+
+    <!-- Ciclo rule 85% -->
+    <div id="trk-rule" class="trk-rule card" style="display:none"></div>
+
+    <div class="trk-main">
+      <!-- Checklist semanal -->
+      <div class="trk-checklist-wrap">
+        <div class="trk-week-nav">
+          <button id="trk-prev-week" title="Semana anterior">&#8592;</button>
+          <span id="trk-week-label" class="trk-week-label"></span>
+          <button id="trk-next-week" title="Semana siguiente">&#8594;</button>
+        </div>
+        <div class="trk-days-header" id="trk-days-header"></div>
+        <div id="trk-checklist"></div>
+
+        <!-- Revisión semanal -->
+        <button class="trk-rev-toggle" id="trk-rev-btn">&#128196; Revisión semanal</button>
+        <div id="trk-rev-panel" class="card">
+          <table class="trk-rev-table" id="trk-rev-table">
+            <thead>
+              <tr>
+                <th style="text-align:left">Semana</th>
+                <th>Score</th>
+                <th>Racha</th>
+                <th style="text-align:left;min-width:200px">Notas</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sidebar: Próximos -->
+      <div class="trk-prox-wrap card">
+        <div class="trk-prox-title">&#128204; Próximos / Recordatorios</div>
+        <div class="trk-prox-row">
+          <input id="trk-prox-input" type="text" placeholder="Agregar recordatorio…" maxlength="120">
+          <button id="trk-prox-add">+</button>
+        </div>
+        <div id="trk-prox-list"></div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- Modal: nota -->
@@ -2062,17 +2175,21 @@
 
             if (tab === 'analysis') {
                 $('#section-analysis').show();
-                $('#section-exercises, #section-courses, #section-practices').hide();
+                $('#section-exercises, #section-courses, #section-practices, #section-tracker').hide();
             } else if (tab === 'courses') {
-                $('#section-analysis, #section-exercises, #section-practices').hide();
+                $('#section-analysis, #section-exercises, #section-practices, #section-tracker').hide();
                 $('#section-courses').show();
                 loadCursosSection();
             } else if (tab === 'practices') {
-                $('#section-analysis, #section-exercises, #section-courses').hide();
+                $('#section-analysis, #section-exercises, #section-courses, #section-tracker').hide();
                 $('#section-practices').show();
                 initPracticasSection();
+            } else if (tab === 'tracker') {
+                $('#section-analysis, #section-exercises, #section-courses, #section-practices').hide();
+                $('#section-tracker').show();
+                initTrackerTab();
             } else {
-                $('#section-analysis, #section-courses, #section-practices').hide();
+                $('#section-analysis, #section-courses, #section-practices, #section-tracker').hide();
                 $('#section-exercises').show();
                 if (!pgnBoardReady) { initPgnBoard(); pgnBoardReady = true; }
                 if (tab === 'books') {
@@ -3278,6 +3395,256 @@
             if (e.key === 'ArrowRight') { e.preventDefault(); if (pracIndex < pracPositions.length-1) { pracIndex++; updatePracBoard(); } }
             else if (e.key === 'ArrowLeft') { e.preventDefault(); if (pracIndex > 0) { pracIndex--; updatePracBoard(); } }
         });
+
+        // ── TRACKER: Mi Año de 12 Semanas ────────────────────────────────────
+
+        let trkDashData = null;   // last /tracker/dashboard response
+        let trkWeekNum  = null;
+        let trkInitDone = false;
+        const TRK_DAYS  = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+        function initTrackerTab() {
+            if (!trkInitDone) {
+                trkInitDone = true;
+                $('#trk-rev-btn').on('click', function() {
+                    $('#trk-rev-panel').toggle();
+                    if ($('#trk-rev-panel').is(':visible')) loadTrkRevision();
+                });
+                $('#trk-prev-week').on('click', function() {
+                    if (trkWeekNum > 1) { trkWeekNum--; loadTrkWeek(trkWeekNum); }
+                });
+                $('#trk-next-week').on('click', function() {
+                    const total = trkDashData ? trkDashData.total_semanas : 12;
+                    if (trkWeekNum < total) { trkWeekNum++; loadTrkWeek(trkWeekNum); }
+                });
+                $('#trk-prox-add').on('click', function() {
+                    const desc = $('#trk-prox-input').val().trim();
+                    if (!desc) return;
+                    fetch('/tracker/proximos', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({descripcion: desc})
+                    }).then(r => r.json()).then(() => {
+                        $('#trk-prox-input').val('');
+                        loadTrkProximos();
+                    });
+                });
+                $('#trk-prox-input').on('keydown', function(e) {
+                    if (e.key === 'Enter') $('#trk-prox-add').click();
+                });
+            }
+            renderTrkDash();
+        }
+
+        function renderTrkDash() {
+            fetch('/tracker/dashboard')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.error) { console.error('tracker dash:', d.error); return; }
+                    trkDashData = d;
+                    if (!trkWeekNum) trkWeekNum = d.semana_actual || 1;
+
+                    const score     = d.puntaje_promedio || 0;
+                    const scoreClass = score >= 85 ? 'sc-g' : score >= 70 ? 'sc-y' : 'sc-r';
+                    const semLabel  = `Sem ${d.semana_actual} / ${d.total_semanas}`;
+
+                    $('#trk-dash').html(`
+                        <div class="trk-card card">
+                            <div class="trk-sub">Score del ciclo</div>
+                            <div class="trk-big ${scoreClass}">${score}%</div>
+                            <div class="trk-pbar"><div class="trk-pfill" style="width:${score}%"></div></div>
+                        </div>
+                        <div class="trk-card card">
+                            <div class="trk-sub">Racha actual</div>
+                            <div class="trk-big">${d.racha} <span style="font-size:1rem">días</span></div>
+                        </div>
+                        <div class="trk-card card">
+                            <div class="trk-sub">Semana actual</div>
+                            <div class="trk-big">${semLabel}</div>
+                        </div>
+                        <div class="trk-card card">
+                            <div class="trk-sub">Días restantes</div>
+                            <div class="trk-big">${d.dias_restantes_ciclo}</div>
+                        </div>
+                    `);
+
+                    const ruleColor = score >= 85 ? '#00b894' : score >= 70 ? '#f0c000' : '#e17055';
+                    const ruleMsg = score >= 85
+                        ? '✅ Excelente — estás en zona de alto rendimiento (≥85%)'
+                        : score >= 70
+                            ? '⚠️ Progreso aceptable — busca alcanzar el 85% (Regla del 85%)'
+                            : '🔴 Por debajo del umbral mínimo — revisar compromisos (<70%)';
+                    $('#trk-rule').css({'border-color': ruleColor, color: ruleColor}).text(ruleMsg).show();
+
+                    loadTrkWeek(trkWeekNum);
+                    loadTrkProximos();
+                })
+                .catch(e => console.error('tracker dash:', e));
+        }
+
+        function loadTrkWeek(num) {
+            trkWeekNum = num;
+            const total = trkDashData ? trkDashData.total_semanas : 12;
+            fetch(`/tracker/semana/${num}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) { console.error('tracker week:', data.error); return; }
+                    const ini = data.fecha_inicio ? new Date(data.fecha_inicio + 'T00:00:00') : null;
+                    const fin = data.fecha_fin    ? new Date(data.fecha_fin    + 'T00:00:00') : null;
+                    const fmt = d => d ? `${d.getDate()}/${d.getMonth()+1}` : '';
+                    $('#trk-week-label').text(`Semana ${num} de ${total}  (${fmt(ini)} – ${fmt(fin)})`);
+                    $('#trk-prev-week').prop('disabled', num <= 1);
+                    $('#trk-next-week').prop('disabled', num >= total);
+                    renderTrkChecklist(data);
+                })
+                .catch(e => console.error('tracker week:', e));
+        }
+
+        function renderTrkChecklist(data) {
+            // dias: array of date strings ['2026-06-10', ...]
+            const diasStr = data.dias || [];
+            const tacticas = data.tacticas || [];
+
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+
+            // Days header
+            let hdr = '<div class="trk-days-spacer" style="flex:1;min-width:100px;"></div>';
+            diasStr.forEach(ds => {
+                const dt = new Date(ds + 'T00:00:00');
+                const isToday = ds === todayStr;
+                hdr += `<div class="trk-day-col${isToday ? ' trk-today' : ''}">
+                    <div>${TRK_DAYS[dt.getDay()]}</div>
+                    <div class="trk-day-num">${dt.getDate()}</div>
+                </div>`;
+            });
+            hdr += '<div style="width:34px"></div>';
+            $('#trk-days-header').html(hdr);
+
+            // Group tacticas by meta
+            const metaMap = new Map();
+            tacticas.forEach(t => {
+                if (!metaMap.has(t.meta_id)) {
+                    metaMap.set(t.meta_id, {id:t.meta_id, nombre:t.meta_nombre, nivel:t.meta_nivel, tacticas:[]});
+                }
+                metaMap.get(t.meta_id).tacticas.push(t);
+            });
+
+            const $cl = $('#trk-checklist').empty();
+            const nivelColors = {compromiso:'#d4ac0d', coccion:'#718096', hobby:'#b7791f',
+                                  bronce:'#b7791f', plata:'#718096', oro:'#d4ac0d'};
+
+            metaMap.forEach(meta => {
+                const nc = nivelColors[meta.nivel] || '#555';
+                let html = `<div class="trk-meta-group">
+                    <div class="trk-meta-header">
+                        <span class="trk-nivel-badge" style="background:${nc}20;color:${nc}">${meta.nivel || ''}</span>
+                        <span class="trk-meta-nombre">${meta.nombre}</span>
+                    </div>`;
+
+                meta.tacticas.forEach(tac => {
+                    // tac.ejecuciones: array of date strings
+                    const execSet = new Set(tac.ejecuciones || []);
+                    let doneCount = 0;
+                    let circles = '';
+                    diasStr.forEach(ds => {
+                        const isFuture = ds > todayStr;
+                        const done = execSet.has(ds);
+                        if (done) doneCount++;
+                        const cls = ['trk-circle', done ? 'done' : '', isFuture ? 'trk-future' : ''].filter(Boolean).join(' ');
+                        const dateAttr = isFuture ? '' : ` data-date="${ds}"`;
+                        circles += `<span class="${cls}" data-tid="${tac.id}"${dateAttr}>${done ? '✓' : ''}</span>`;
+                    });
+                    const met = doneCount >= tac.frecuencia_semanal;
+                    html += `<div class="trk-tac-row">
+                        <span class="trk-tac-desc">${tac.descripcion} <span style="color:#555;font-size:0.7rem">(×${tac.frecuencia_semanal}/sem)</span></span>
+                        <div class="trk-circles">${circles}</div>
+                        <span class="trk-count${met ? ' met' : ''}">${doneCount}/${tac.frecuencia_semanal}</span>
+                    </div>`;
+                });
+
+                html += '</div>';
+                $cl.append(html);
+            });
+
+            $cl.off('click', '.trk-circle').on('click', '.trk-circle', function() {
+                if ($(this).hasClass('trk-future')) return;
+                const tid  = $(this).data('tid');
+                const fecha = $(this).data('date');
+                if (!tid || !fecha) return;
+                fetch('/tracker/ejecucion', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({tactica_id: tid, fecha: fecha})
+                }).then(r => r.json()).then(() => {
+                    renderTrkDash();
+                }).catch(e => console.error('toggle exec:', e));
+            });
+        }
+
+        function loadTrkProximos() {
+            fetch('/tracker/proximos')
+                .then(r => r.json())
+                .then(items => {
+                    if (!Array.isArray(items)) return;
+                    const $list = $('#trk-prox-list').empty();
+                    if (!items.length) {
+                        $list.html('<div style="color:#555;font-size:0.8rem;padding:4px 0">Sin recordatorios</div>');
+                        return;
+                    }
+                    items.forEach(item => {
+                        const diasTxt = item.dias === 0 ? 'hoy' : item.dias === 1 ? 'hace 1 día' : `hace ${item.dias} días`;
+                        $list.append(`<div class="trk-prox-item">
+                            <span class="trk-prox-desc">${item.descripcion}</span>
+                            <span class="trk-prox-dias">${diasTxt}</span>
+                            <button class="trk-prox-del" data-id="${item.id}" title="Eliminar">✕</button>
+                        </div>`);
+                    });
+                    $list.off('click', '.trk-prox-del').on('click', '.trk-prox-del', function() {
+                        fetch(`/tracker/proximos/${$(this).data('id')}`, {method:'DELETE'})
+                            .then(() => loadTrkProximos());
+                    });
+                });
+        }
+
+        function loadTrkRevision() {
+            fetch('/tracker/revision')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.error) { console.error('revision:', d.error); return; }
+                    const cicloId = d.ciclo_id;
+                    const $tbody = $('#trk-rev-table tbody').empty();
+                    (d.semanas || []).forEach(s => {
+                        const sc = s.score;
+                        const cls = sc >= 85 ? 'sc-g' : sc >= 70 ? 'sc-y' : 'sc-r';
+                        $tbody.append(`<tr data-sem="${s.numero}" data-cid="${cicloId}" data-score="${sc}">
+                            <td style="text-align:left">Sem ${s.numero}</td>
+                            <td class="${cls}">${sc}%</td>
+                            <td style="text-align:left;min-width:200px"><textarea rows="2" placeholder="Notas…">${s.notas || ''}</textarea></td>
+                            <td><button class="trk-rev-save">Guardar</button></td>
+                        </tr>`);
+                    });
+                    $tbody.off('click', '.trk-rev-save').on('click', '.trk-rev-save', function() {
+                        const $row = $(this).closest('tr');
+                        const $btn = $(this);
+                        fetch('/tracker/revision', {
+                            method: 'POST',
+                            headers: {'Content-Type':'application/json'},
+                            body: JSON.stringify({
+                                ciclo_id: $row.data('cid'),
+                                numero_semana: $row.data('sem'),
+                                puntaje: $row.data('score'),
+                                notas: $row.find('textarea').val()
+                            })
+                        }).then(() => {
+                            $btn.text('✓').css('color','#00b894');
+                            setTimeout(() => $btn.text('Guardar').css('color',''), 1500);
+                        });
+                    });
+                });
+        }
+
+        // end tracker
 
     });
 
