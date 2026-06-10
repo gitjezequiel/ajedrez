@@ -698,30 +698,29 @@ def proxy_study_prod(study_id):
 
 @app.route('/api/lichess-study/<study_id>/chapters')
 def lichess_study_chapters(study_id):
-    import urllib.request
-    url = f'https://lichess.org/study/{study_id}.pgn'
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/x-chess-pgn'})
+    import urllib.request, json as json_mod
+    url = f'https://lichess.org/api/study/{study_id}/chapters'
+    req = urllib.request.Request(url, headers={
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'application/x-ndjson'
+    })
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
-            pgn = resp.read().decode('utf-8')
+            content = resp.read().decode('utf-8')
     except Exception as e:
         return jsonify({'error': str(e)}), 502
     chapters = []
-    num = 0
-    event = site = None
-    for line in pgn.splitlines():
-        line = line.strip()
-        if line.startswith('[Event "'):
-            event = line[8:-2]
-            site = None
-        elif line.startswith('[Site "') and event is not None:
-            site = line[7:-2]
-            if '/study/' in site:
-                chapter_id = site.rstrip('/').split('/')[-1]
-                if len(chapter_id) >= 6:
-                    num += 1
-                    chapters.append({'num': num, 'id': chapter_id, 'titulo': event})
-                    event = site = None
+    for line in content.strip().splitlines():
+        try:
+            obj = json_mod.loads(line)
+            if 'id' in obj:
+                chapters.append({
+                    'num':    len(chapters) + 1,
+                    'id':     obj['id'],
+                    'titulo': obj.get('name', f'Capítulo {len(chapters)+1}')
+                })
+        except Exception:
+            pass
     return jsonify(chapters)
 
 @app.route('/api/practicas/grupos/<int:grupo_id>/talleres', methods=['POST'])
