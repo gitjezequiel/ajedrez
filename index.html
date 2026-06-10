@@ -3182,6 +3182,7 @@
 
         let pracNavLevel      = 'sets';
         let pracCurrentSet    = null;
+        let pracCurrentTaller = null;
         let pracCurrentPatron = null;
         let pracCurrentLeccion = null;
         let pracCurrentMode  = 'ejercicio';
@@ -3397,16 +3398,11 @@
             clearPracAnnotations();
             if (pracBoardInst) pracBoardInst.position('start', false);
             const $list = $('#prac-sets-list').empty();
-            let lastGrupo = null;
             PRACTICAS_SETS.forEach(set => {
-                if (set.grupo && set.grupo !== lastGrupo) {
-                    lastGrupo = set.grupo;
-                    $list.append(`<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#636e72;margin:18px 0 8px;padding-left:2px;">${set.grupo}</div>`);
-                }
-                const isTaller = set.tipo === 'taller';
-                const icon     = isTaller ? '⚡' : '♚';
-                const count    = isTaller ? set.lecciones.length : set.patrones.length;
-                const countTxt = isTaller ? `${count} lecciones` : `${count} patrones`;
+                const isGrupo  = set.tipo === 'grupo';
+                const icon     = isGrupo ? '⚡' : '♚';
+                const count    = isGrupo ? set.talleres.length : set.patrones.length;
+                const countTxt = isGrupo ? `${count} talleres` : `${count} patrones`;
                 const $card = $(`<div class="topic-card" style="cursor:pointer;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <span style="font-size:1.8rem;">${icon}</span>
@@ -3417,24 +3413,24 @@
                         <i class="fas fa-chevron-right" style="color:#636e72;"></i>
                     </div>
                 </div>`);
-                $card.on('click', isTaller ? () => showPracLecciones(set) : () => showPracPatrones(set));
+                $card.on('click', () => showPracPatrones(set));
                 $card.appendTo($list);
             });
         }
 
-        function showPracLecciones(set) {
-            pracNavLevel = 'patterns';
-            pracCurrentSet = set;
+        function showPracLecciones(taller) {
+            pracNavLevel = 'lecciones';
+            pracCurrentTaller = taller;
             $('#prac-sets-panel').hide();
             $('#prac-patterns-panel').show();
             $('#prac-playing-panel').hide();
             $('#prac-nav-bar, #prac-feedback').hide();
             $('#prac-status').text('');
-            $('#prac-header-title').text(set.titulo);
-            $('#prac-patterns-label').text(`${set.lecciones.length} Lecciones`);
-            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> Prácticas');
+            $('#prac-header-title').text(taller.titulo);
+            $('#prac-patterns-label').text(`${taller.lecciones.length} Lecciones`);
+            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
             const $list = $('#prac-patterns-list').empty();
-            set.lecciones.forEach(l => {
+            taller.lecciones.forEach(l => {
                 const $card = $(`<div class="exercise-card" style="cursor:pointer;">
                     <div class="exercise-num">${l.num}</div>
                     <div style="flex:1;">
@@ -3451,27 +3447,46 @@
         function showPracPatrones(set) {
             pracNavLevel = 'patterns';
             pracCurrentSet = set;
+            pracCurrentTaller = null;
             $('#prac-sets-panel').hide();
             $('#prac-patterns-panel').show();
             $('#prac-playing-panel').hide();
             $('#prac-nav-bar, #prac-feedback').hide();
             $('#prac-status').text('');
             $('#prac-header-title').text(set.titulo);
-            $('#prac-patterns-label').text(`${set.patrones.length} Patrones de Jaque Mate`);
             $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> Prácticas');
             const $list = $('#prac-patterns-list').empty();
-            set.patrones.forEach(p => {
-                const $card = $(`<div class="exercise-card" style="cursor:pointer;">
-                    <div class="exercise-num">${p.num}</div>
-                    <div style="flex:1;">
-                        <div class="exercise-name">${p.nombre}</div>
-                        <div class="exercise-moves">Mate de ${p.nombre}</div>
-                    </div>
-                    <i class="fas fa-chevron-right" style="color:#636e72;margin-left:auto;"></i>
-                </div>`);
-                $card.on('click', () => openPracPatron(p));
-                $card.appendTo($list);
-            });
+            if (set.tipo === 'grupo') {
+                $('#prac-patterns-label').text(`${set.talleres.length} Talleres`);
+                set.talleres.forEach(t => {
+                    const $card = $(`<div class="topic-card" style="cursor:pointer;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span style="font-size:1.8rem;">⚔️</span>
+                            <div style="flex:1;">
+                                <div class="topic-title">${t.titulo}</div>
+                                <div class="topic-sub">${t.lecciones.length} lecciones</div>
+                            </div>
+                            <i class="fas fa-chevron-right" style="color:#636e72;"></i>
+                        </div>
+                    </div>`);
+                    $card.on('click', () => showPracLecciones(t));
+                    $card.appendTo($list);
+                });
+            } else {
+                $('#prac-patterns-label').text(`${set.patrones.length} Patrones de Jaque Mate`);
+                set.patrones.forEach(p => {
+                    const $card = $(`<div class="exercise-card" style="cursor:pointer;">
+                        <div class="exercise-num">${p.num}</div>
+                        <div style="flex:1;">
+                            <div class="exercise-name">${p.nombre}</div>
+                            <div class="exercise-moves">Mate de ${p.nombre}</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color:#636e72;margin-left:auto;"></i>
+                    </div>`);
+                    $card.on('click', () => openPracPatron(p));
+                    $card.appendTo($list);
+                });
+            }
         }
 
         function openPracPatron(patron) {
@@ -3491,7 +3506,7 @@
             pracNavLevel = 'playing';
             pracCurrentLeccion = leccion;
             pracCurrentPatron = null;
-            const lecciones = pracCurrentSet.lecciones;
+            const lecciones = pracCurrentTaller.lecciones;
             const idx = lecciones.indexOf(leccion);
             $('#prac-sets-panel, #prac-patterns-panel').hide();
             $('#prac-playing-panel').css('display', 'flex');
@@ -3501,7 +3516,7 @@
             $('#btn-prac-lec-prev').prop('disabled', idx === 0).css('opacity', idx === 0 ? 0.35 : 1);
             $('#btn-prac-lec-next').prop('disabled', idx === lecciones.length - 1).css('opacity', idx === lecciones.length - 1 ? 0.35 : 1);
             $('#prac-header-title').text(leccion.titulo);
-            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
+            $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentTaller.titulo);
             loadPracChapter(leccion.chapterId, 'ejercicio', leccion.studyId);
         }
 
@@ -3530,7 +3545,7 @@
                     renderPracMoveList();
                     updatePracBoard();
                     $('#prac-nav-bar').show();
-                    const feedMsg = (pracCurrentSet && pracCurrentSet.tipo === 'taller')
+                    const feedMsg = pracCurrentTaller
                         ? '♟ Tu turno — encuentra la jugada'
                         : '♟ Tu turno — encuentra el jaque mate';
                     if (isEj) showPracFeedback('waiting', feedMsg);
@@ -3544,22 +3559,30 @@
             fetch('/api/practicas/talleres')
                 .then(r => r.json())
                 .then(talleres => {
-                    PRACTICAS_SETS = PRACTICAS_SETS.filter(s => s.tipo !== 'taller');
+                    PRACTICAS_SETS = PRACTICAS_SETS.filter(s => s.tipo !== 'taller' && s.tipo !== 'grupo');
+                    const grupoMap = new Map();
                     talleres.forEach(t => {
-                        PRACTICAS_SETS.push({
-                            id: `taller-${t.slug}`,
-                            tipo: 'taller',
-                            grupo: t.grupo_nombre,
+                        const gn = t.grupo_nombre;
+                        if (!grupoMap.has(gn)) {
+                            grupoMap.set(gn, {
+                                id: 'grupo-' + gn.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                                tipo: 'grupo',
+                                titulo: gn,
+                                talleres: []
+                            });
+                        }
+                        grupoMap.get(gn).talleres.push({
+                            id: 'taller-' + t.slug,
+                            slug: t.slug,
                             titulo: t.titulo,
                             descripcion: t.descripcion,
                             lecciones: t.lecciones.map(l => ({
-                                num:       l.num,
-                                titulo:    l.titulo,
-                                studyId:   l.study_id,
-                                chapterId: l.chapter_id
+                                num: l.num, titulo: l.titulo,
+                                studyId: l.study_id, chapterId: l.chapter_id
                             }))
                         });
                     });
+                    grupoMap.forEach(g => PRACTICAS_SETS.push(g));
                 })
                 .catch(() => {})
                 .finally(() => {
@@ -3579,9 +3602,10 @@
         });
 
         $('#btn-prac-back').click(() => {
-            if (pracNavLevel === 'patterns') showPracSets();
+            if (pracNavLevel === 'lecciones') showPracPatrones(pracCurrentSet);
+            else if (pracNavLevel === 'patterns') showPracSets();
             else if (pracNavLevel === 'playing') {
-                if (pracCurrentSet && pracCurrentSet.tipo === 'taller') showPracLecciones(pracCurrentSet);
+                if (pracCurrentTaller) showPracLecciones(pracCurrentTaller);
                 else showPracPatrones(pracCurrentSet);
             }
         });
@@ -3596,14 +3620,14 @@
         });
 
         $('#btn-prac-lec-prev').click(() => {
-            if (!pracCurrentLeccion || !pracCurrentSet) return;
-            const lecs = pracCurrentSet.lecciones;
+            if (!pracCurrentLeccion || !pracCurrentTaller) return;
+            const lecs = pracCurrentTaller.lecciones;
             const idx  = lecs.indexOf(pracCurrentLeccion);
             if (idx > 0) openPracLeccion(lecs[idx - 1]);
         });
         $('#btn-prac-lec-next').click(() => {
-            if (!pracCurrentLeccion || !pracCurrentSet) return;
-            const lecs = pracCurrentSet.lecciones;
+            if (!pracCurrentLeccion || !pracCurrentTaller) return;
+            const lecs = pracCurrentTaller.lecciones;
             const idx  = lecs.indexOf(pracCurrentLeccion);
             if (idx < lecs.length - 1) openPracLeccion(lecs[idx + 1]);
         });
