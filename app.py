@@ -670,6 +670,7 @@ def api_practicas_talleres():
                                FROM practica_lecciones WHERE taller_id=%s ORDER BY orden""", (t['id'],))
                 t['lecciones'] = cur.fetchall()
                 t['grupo_nombre'] = g['nombre']
+                t['grupo_id']    = g['id']
             result.extend(talleres)
         cur.close(); conn.close()
         return jsonify(result)
@@ -694,6 +695,75 @@ def proxy_study_prod(study_id):
     with urllib.request.urlopen(req, timeout=10) as resp:
         data = json.loads(resp.read())
     return jsonify(data)
+
+@app.route('/api/lichess-study/<study_id>/chapters')
+def lichess_study_chapters(study_id):
+    import urllib.request
+    url = f'https://lichess.org/study/{study_id}.pgn'
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/x-chess-pgn'})
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            pgn = resp.read().decode('utf-8')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 502
+    chapters = []
+    num = 0
+    event = site = None
+    for line in pgn.splitlines():
+        line = line.strip()
+        if line.startswith('[Event "'):
+            event = line[8:-2]
+            site = None
+        elif line.startswith('[Site "') and event is not None:
+            site = line[7:-2]
+            if '/study/' in site:
+                chapter_id = site.rstrip('/').split('/')[-1]
+                if len(chapter_id) >= 6:
+                    num += 1
+                    chapters.append({'num': num, 'id': chapter_id, 'titulo': event})
+                    event = site = None
+    return jsonify(chapters)
+
+@app.route('/api/practicas/grupos/<int:grupo_id>/talleres', methods=['POST'])
+def crear_taller_en_grupo(grupo_id):
+    data = request.json or {}
+    nombre   = data.get('nombre', '').strip()
+    lecciones = data.get('lecciones', [])
+    if not nombre:
+        return jsonify({'error': 'nombre requerido'}), 400
+    slug = re.sub(r'[^a-z0-9]+', '-', nombre.lower()).strip('-')
+    conn = get_db(); cur = conn.cursor(dictionary=True)
+    base_slug, suffix = slug, 1
+    while True:
+        cur.execute("SELECT id FROM practica_talleres WHERE slug=%s", (slug,))
+        if not cur.fetchone(): break
+        slug = f"{base_slug}-{suffix}"; suffix += 1
+    cur.execute("SELECT COALESCE(MAX(orden),0)+1 AS n FROM practica_talleres WHERE grupo_id=%s", (grupo_id,))
+    orden = cur.fetchone()['n']
+    cur.execute("INSERT INTO practica_talleres (grupo_id, slug, titulo, descripcion, orden) VALUES (%s,%s,%s,%s,%s)",
+                (grupo_id, slug, nombre, '', orden))
+    conn.commit()
+    taller_id = cur.lastrowid
+    for i, lec in enumerate(lecciones):
+        cur.execute("INSERT INTO practica_lecciones (taller_id, num, titulo, study_id, chapter_id, orden) VALUES (%s,%s,%s,%s,%s,%s)",
+                    (taller_id, i+1, lec['titulo'], lec['study_id'], lec['chapter_id'], i+1))
+    conn.commit(); cur.close(); conn.close()
+    return jsonify({'id': taller_id, 'slug': slug})
+
+@app.route('/api/practicas/talleres/<int:taller_id>/lecciones', methods=['POST'])
+def agregar_lecciones_a_taller(taller_id):
+    lecciones = (request.json or {}).get('lecciones', [])
+    if not lecciones:
+        return jsonify({'error': 'lecciones requeridas'}), 400
+    conn = get_db(); cur = conn.cursor(dictionary=True)
+    cur.execute("SELECT COALESCE(MAX(num),0) AS mn, COALESCE(MAX(orden),0) AS mo FROM practica_lecciones WHERE taller_id=%s", (taller_id,))
+    row = cur.fetchone()
+    base_num, base_ord = row['mn'], row['mo']
+    for i, lec in enumerate(lecciones):
+        cur.execute("INSERT INTO practica_lecciones (taller_id, num, titulo, study_id, chapter_id, orden) VALUES (%s,%s,%s,%s,%s,%s)",
+                    (taller_id, base_num+i+1, lec['titulo'], lec['study_id'], lec['chapter_id'], base_ord+i+1))
+    conn.commit(); cur.close(); conn.close()
+    return jsonify({'added': len(lecciones)})
 
 @app.route('/proxy/lichess-study/<study_id>')
 def proxy_lichess_study(study_id):
