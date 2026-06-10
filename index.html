@@ -3502,7 +3502,7 @@
             $('#btn-prac-lec-next').prop('disabled', idx === lecciones.length - 1).css('opacity', idx === lecciones.length - 1 ? 0.35 : 1);
             $('#prac-header-title').text(leccion.titulo);
             $('#btn-prac-back').show().html('<i class="fas fa-arrow-left"></i> ' + pracCurrentSet.titulo);
-            loadPracChapter(leccion.chapterId, 'teoria', leccion.studyId);
+            loadPracChapter(leccion.chapterId, 'ejercicio', leccion.studyId);
         }
 
         function loadPracChapter(chapterId, mode, studyId) {
@@ -3530,7 +3530,10 @@
                     renderPracMoveList();
                     updatePracBoard();
                     $('#prac-nav-bar').show();
-                    if (isEj) showPracFeedback('waiting', '♟ Tu turno — encuentra el jaque mate');
+                    const feedMsg = (pracCurrentSet && pracCurrentSet.tipo === 'taller')
+                        ? '♟ Tu turno — encuentra la jugada'
+                        : '♟ Tu turno — encuentra el jaque mate';
+                    if (isEj) showPracFeedback('waiting', feedMsg);
                 })
                 .catch(() => { $('#prac-moves-list').html('<div style="color:#e17055;text-align:center;padding:20px;">Error al cargar.</div>'); });
         }
