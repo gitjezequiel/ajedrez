@@ -258,6 +258,32 @@
             border-radius: 6px;
         }
 
+        .sf-level-btns {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .sf-level-btn {
+            font-size: 0.72rem;
+            padding: 4px 9px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .sf-level-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .sf-level-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
         .chat-input-area {
             padding: 15px;
             background-color: var(--bg-darker);
@@ -788,6 +814,8 @@
         }
         .pgn-move:hover { background: rgba(0,184,148,0.2); color: var(--accent); }
         .pgn-move.current { background: var(--accent); color: #fff; font-weight: bold; }
+        .pgn-solution-btn { display:block; width:100%; background:rgba(255,255,255,.04); border:1px dashed rgba(255,255,255,.14); color:#636e72; padding:10px 14px; border-radius:8px; cursor:pointer; font-size:.83rem; transition:all .18s; margin-bottom:10px; text-align:center; }
+        .pgn-solution-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,184,148,.05); }
 
         /* Board nav */
         .pgn-nav-bar {
@@ -1101,6 +1129,124 @@
         .trk-btn-primary { background: var(--accent); border: none; color: #fff; padding: 8px 22px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
         .trk-btn-primary:hover { filter: brightness(1.1); }
         .trk-btn-primary:disabled { opacity: .5; cursor: default; filter: none; }
+
+        /* ═══════════════════════════════════════════════════
+           NOTAS TAB
+        ═══════════════════════════════════════════════════ */
+        #section-notas { background: var(--bg-darker); }
+        .nts-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 100px); }
+        .nts-sidebar { border-right: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; background: #12122a; }
+        .nts-sidebar-head { padding: 18px 16px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .nts-sidebar-title { font-size: .78rem; font-weight: 700; color: #7f8c8d; text-transform: uppercase; letter-spacing: .1em; }
+        .nts-new-btn { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); border: none; color: #fff; font-size: .85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity .15s, transform .2s; }
+        .nts-new-btn:hover { opacity: .85; transform: rotate(90deg); }
+        .nts-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .nts-item { padding: 11px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-left: 3px solid transparent; transition: background .15s; position: relative; }
+        .nts-item:hover { background: rgba(255,255,255,.04); }
+        .nts-item.active { background: rgba(255,255,255,.07); }
+        .nts-item-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .nts-item-name { font-size: .88rem; color: #dfe6e9; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .nts-item-del { display: none; background: none; border: none; color: #636e72; font-size: .75rem; cursor: pointer; padding: 3px 6px; border-radius: 4px; transition: color .15s; }
+        .nts-item:hover .nts-item-del { display: block; }
+        .nts-item-del:hover { color: #e17055 !important; }
+        .nts-main { overflow-y: auto; max-height: calc(100vh - 100px); }
+        .nts-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55vh; color: #4a5568; text-align: center; gap: 12px; }
+        .nts-empty i { font-size: 2.8rem; }
+        .nts-editor-wrap { padding: 36px 48px 60px; }
+        .nts-titulo-input { display: block; width: 100%; background: transparent; border: none; border-bottom: 2px solid rgba(255,255,255,.1); color: #fff; font-size: 1.9rem; font-weight: 700; padding: 6px 0 10px; margin-bottom: 14px; outline: none; transition: border-color .25s; box-sizing: border-box; font-family: inherit; }
+        .nts-titulo-input:focus { border-bottom-color: var(--accent); }
+        .nts-color-row { display: flex; gap: 9px; align-items: center; margin-bottom: 32px; }
+        .nts-color-dot { width: 18px; height: 18px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s, border-color .15s; }
+        .nts-color-dot:hover { transform: scale(1.25); }
+        .nts-color-dot.selected { border-color: #fff; transform: scale(1.2); }
+        .nts-sec-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; margin-bottom: 10px; overflow: hidden; transition: border-color .15s; }
+        .nts-sec-card:hover { border-color: rgba(255,255,255,.13); }
+        .nts-sec-header { padding: 12px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+        .nts-sec-toggle { color: #636e72; font-size: .7rem; transition: transform .2s; width: 12px; flex-shrink: 0; }
+        .nts-sec-card.collapsed .nts-sec-toggle { transform: rotate(-90deg); }
+        .nts-sec-title-input { flex: 1; background: transparent; border: none; color: #e0e0e0; font-size: .95rem; font-weight: 600; outline: none; cursor: text; font-family: inherit; }
+        .nts-sec-title-input::placeholder { color: #4a5568; }
+        .nts-sec-actions { display: flex; gap: 6px; opacity: 0; transition: opacity .15s; }
+        .nts-sec-header:hover .nts-sec-actions { opacity: 1; }
+        .nts-sec-action-btn { background: none; border: 1px solid rgba(255,255,255,.1); color: #adb5bd; font-size: .73rem; padding: 3px 9px; border-radius: 5px; cursor: pointer; white-space: nowrap; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+        .nts-sec-action-btn:hover { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.2); }
+        .nts-sec-action-btn.del:hover { border-color: #e17055; color: #e17055; background: rgba(225,112,85,.08); }
+        .nts-sec-body { padding: 0 14px 14px; }
+        .nts-sec-textarea { width: 100%; background: transparent; border: none; color: #b2bec3; font-size: .88rem; line-height: 1.65; resize: none; outline: none; min-height: 56px; padding: 8px 4px; font-family: inherit; box-sizing: border-box; overflow: hidden; transition: background .15s, padding .15s; }
+        .nts-sec-textarea:focus { background: rgba(255,255,255,.03); padding: 8px 10px; border-radius: 6px; }
+        .nts-sub-list { margin-top: 6px; }
+        .nts-sub-card { background: rgba(0,0,0,.18); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; margin-bottom: 7px; margin-left: 20px; overflow: hidden; transition: border-color .15s; }
+        .nts-sub-card:hover { border-color: rgba(255,255,255,.11); }
+        .nts-sub-header { padding: 9px 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+        .nts-sub-toggle { color: #4a5568; font-size: .65rem; transition: transform .2s; width: 11px; flex-shrink: 0; }
+        .nts-sub-card.collapsed .nts-sub-toggle { transform: rotate(-90deg); }
+        .nts-sub-title-input { flex: 1; background: transparent; border: none; color: #b2bec3; font-size: .85rem; font-weight: 600; outline: none; font-family: inherit; }
+        .nts-sub-title-input::placeholder { color: #3d4a5c; }
+        .nts-sub-del-btn { background: none; border: none; color: #3d4a5c; font-size: .72rem; cursor: pointer; padding: 2px 6px; border-radius: 4px; opacity: 0; transition: opacity .15s, color .15s; }
+        .nts-sub-header:hover .nts-sub-del-btn { opacity: 1; }
+        .nts-sub-del-btn:hover { color: #e17055 !important; }
+        .nts-sub-body { padding: 0 12px 10px; }
+        .nts-sub-textarea { width: 100%; background: transparent; border: none; color: #81ecec; font-size: .84rem; line-height: 1.6; resize: none; outline: none; min-height: 46px; padding: 6px 4px; font-family: inherit; box-sizing: border-box; overflow: hidden; transition: background .15s; }
+        .nts-sub-textarea:focus { background: rgba(255,255,255,.04); padding: 6px 8px; border-radius: 5px; }
+        .nts-add-sub-btn { background: none; border: 1px dashed rgba(255,255,255,.1); color: #4a5568; font-size: .76rem; padding: 5px 12px; border-radius: 6px; cursor: pointer; margin-top: 6px; margin-left: 20px; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+        .nts-add-sub-btn:hover { border-color: rgba(255,255,255,.22); color: #adb5bd; }
+        .nts-add-sec-btn { background: none; border: 1px dashed rgba(255,255,255,.1); color: #636e72; font-size: .84rem; padding: 11px 20px; border-radius: 9px; cursor: pointer; margin-top: 6px; width: 100%; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .nts-add-sec-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,184,148,.05); }
+        /* Sidebar icon buttons (edit + delete) */
+        .nts-item-btns { display: none; gap: 2px; align-items: center; }
+        .nts-item:hover .nts-item-btns { display: flex; }
+        .nts-item-icon-btn { background: none; border: none; color: #636e72; font-size: .72rem; cursor: pointer; padding: 3px 7px; border-radius: 4px; transition: color .15s; }
+        .nts-ib-edit:hover { color: var(--accent) !important; }
+        .nts-ib-del:hover { color: #e17055 !important; }
+        /* Back button in edit mode */
+        .nts-view-back-btn { background: none; border: none; color: #636e72; font-size: .82rem; cursor: pointer; padding: 0 0 18px; display: flex; align-items: center; gap: 7px; transition: color .15s; }
+        .nts-view-back-btn:hover { color: var(--accent); }
+        /* Article / viewer */
+        .nts-viewer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+        .nts-viewer-title { font-size: 1.85rem; font-weight: 700; color: #fff; line-height: 1.25; flex: 1; margin: 0; }
+        .nts-edit-btn { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #adb5bd; font-size: .8rem; padding: 7px 16px; border-radius: 7px; cursor: pointer; white-space: nowrap; transition: all .18s; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .nts-edit-btn:hover { background: rgba(255,255,255,.13); color: #fff; border-color: rgba(255,255,255,.24); }
+        .nts-viewer-colors { display: flex; gap: 7px; margin-bottom: 30px; margin-top: 6px; }
+        .nts-viewer-cdot { width: 7px; height: 7px; border-radius: 50%; opacity: .3; transition: opacity .15s; }
+        .nts-viewer-cdot.sel { opacity: 1; width: 9px; height: 9px; }
+        .nts-art-sec { margin-bottom: 30px; }
+        .nts-art-sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 9px; border-bottom: 1px solid rgba(255,255,255,.07); }
+        .nts-art-sec-bar { width: 3px; height: 18px; border-radius: 2px; flex-shrink: 0; }
+        .nts-art-sec-title { font-size: 1.05rem; font-weight: 700; color: #e0e0e0; margin: 0; }
+        .nts-art-content { color: #b2bec3; font-size: .9rem; line-height: 1.78; white-space: pre-wrap; padding-left: 13px; margin: 0 0 8px; }
+        .nts-art-sub { margin-left: 13px; margin-top: 16px; padding-left: 14px; border-left: 2px solid rgba(129,236,236,.18); }
+        .nts-art-sub-title { font-size: .9rem; font-weight: 700; color: #81ecec; margin: 0 0 6px; }
+        .nts-art-sub-content { color: #74b9ff; font-size: .86rem; line-height: 1.72; white-space: pre-wrap; margin: 0; }
+        .nts-art-hint { color: #3d4a5c; font-style: italic; font-size: .88rem; padding-left: 4px; }
+        /* ── Toolbar de escritura ── */
+        .nts-toolbar { display:flex; align-items:center; gap:3px; padding:6px 10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:8px; margin-bottom:18px; flex-wrap:wrap; }
+        .nts-tb-group { display:flex; align-items:center; gap:2px; }
+        .nts-tb-sep { width:1px; height:16px; background:rgba(255,255,255,.1); margin:0 5px; flex-shrink:0; }
+        .nts-tb-btn { background:none; border:none; color:#adb5bd; min-width:28px; height:26px; border-radius:5px; cursor:pointer; font-size:.8rem; display:flex; align-items:center; justify-content:center; transition:all .12s; padding:0 5px; font-family:inherit; }
+        .nts-tb-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
+        .nts-tb-btn.active { background:var(--accent); color:#fff; }
+        /* ── Editor rico (contenteditable) ── */
+        .nts-rich-editor { outline:none; min-height:60px; color:#b2bec3; font-size:.88rem; line-height:1.68; padding:8px 4px; transition:background .15s, padding .15s; }
+        .nts-rich-editor:focus { background:rgba(255,255,255,.03); padding:8px 10px; border-radius:6px; }
+        .nts-rich-editor:empty::before { content:attr(data-placeholder); color:#4a5568; pointer-events:none; display:block; }
+        .nts-rich-editor h2 { font-size:1.1rem; color:#e0e0e0; font-weight:700; margin:10px 0 5px; }
+        .nts-rich-editor h3 { font-size:.95rem; color:#dfe6e9; font-weight:700; margin:8px 0 4px; }
+        .nts-rich-editor ul, .nts-rich-editor ol { padding-left:22px; margin:6px 0; }
+        .nts-rich-editor li { margin:2px 0; }
+        .nts-rich-editor code { background:rgba(255,255,255,.1); padding:1px 6px; border-radius:3px; font-family:'Courier New',monospace; font-size:.85em; color:#81ecec; }
+        .nts-rich-editor b, .nts-rich-editor strong { color:#e0e0e0; }
+        .nts-sub-rich-editor { color:#b0c4de; }
+        .nts-sub-rich-editor:empty::before { content:attr(data-placeholder); color:#3d4a5c; }
+        /* ── Vista artículo: HTML renderizado ── */
+        .nts-art-content { color:#b2bec3; font-size:.9rem; line-height:1.78; padding-left:13px; margin:0 0 8px; }
+        .nts-art-content h2 { font-size:1.05rem; color:#e0e0e0; font-weight:700; margin:10px 0 4px; }
+        .nts-art-content h3 { font-size:.9rem; color:#dfe6e9; font-weight:700; margin:7px 0 3px; }
+        .nts-art-content ul, .nts-art-content ol { padding-left:20px; margin:4px 0; }
+        .nts-art-content li { margin:2px 0; }
+        .nts-art-content code { background:rgba(255,255,255,.1); padding:1px 5px; border-radius:3px; font-family:'Courier New',monospace; font-size:.85em; color:#81ecec; }
+        .nts-art-content b, .nts-art-content strong { color:#e0e0e0; }
+        .nts-art-sub-content { color:#74b9ff; font-size:.86rem; line-height:1.72; }
+        .nts-art-sub-content code { color:#55efc4; }
     </style>
 </head>
 <body>
@@ -1114,6 +1260,7 @@
         <button class="tab-btn" data-tab="courses" style="display:none"><i class="fas fa-graduation-cap"></i> Cursos</button>
         <button class="tab-btn" data-tab="practices"><i class="fas fa-dumbbell"></i> Prácticas</button>
         <button class="tab-btn" data-tab="tracker"><i class="fas fa-calendar-alt"></i> 12 Semanas</button>
+        <button class="tab-btn" data-tab="notas"><i class="fas fa-book-open"></i> Notas</button>
     </nav>
     <button id="btn-new-game"><i class="fas fa-plus"></i> Nueva Partida</button>
 </header>
@@ -1218,7 +1365,13 @@
         <div class="chat-toolbar">
             <label for="image-input" class="btn-icon" title="Subir imagen"><i class="fas fa-image"></i></label>
             <input type="file" id="image-input" accept="image/*" style="display:none">
-            <button id="btn-analyze"><i class="fas fa-microchip"></i> Analizar Posición</button>
+            <div class="sf-level-btns">
+                <button class="sf-level-btn" data-level="rapido" title="~1s">⚡</button>
+                <button class="sf-level-btn active" data-level="normal" title="~3s">Normal</button>
+                <button class="sf-level-btn" data-level="profundo" title="~8s">Profundo</button>
+                <button class="sf-level-btn" data-level="maximo" title="~20s">Máximo</button>
+            </div>
+            <button id="btn-analyze"><i class="fas fa-microchip"></i> Analizar</button>
         </div>
         <div class="chat-input-area">
             <textarea id="chat-input" placeholder="Pregunta sobre la posición..."></textarea>
@@ -1286,6 +1439,7 @@
             <div id="pgn-exercise-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
                 <div id="pgn-moves-wrap" style="flex:1;overflow-y:auto;padding:12px 15px;">
                     <div id="pgn-game-title"></div>
+                    <button id="pgn-show-solution" class="pgn-solution-btn" style="display:none"><i class="fas fa-eye"></i> Mostrar solución</button>
                     <div id="pgn-moves-list"></div>
                     <div id="pgn-comment"></div>
                     <div id="pgn-notes-list"></div>
@@ -1398,6 +1552,7 @@
                 </div>
                 <div id="prac-moves-wrap" style="flex:1;overflow-y:auto;padding:12px 15px;">
                     <div id="prac-game-title" style="font-weight:600;color:#dfe6e9;margin-bottom:10px;font-size:0.9rem;"></div>
+                    <button id="prac-show-solution" class="pgn-solution-btn" style="display:none"><i class="fas fa-eye"></i> Mostrar solución</button>
                     <div id="prac-moves-list" style="line-height:1.9;font-size:0.88rem;"></div>
                     <div id="prac-comment"></div>
                 </div>
@@ -1459,6 +1614,64 @@
           <button id="trk-prox-add">+</button>
         </div>
         <div id="trk-prox-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ Notas ══════════════════════════════════════════════════════════════ -->
+<div id="section-notas" style="display:none">
+  <div class="nts-layout">
+
+    <!-- Sidebar: lista de notas -->
+    <div class="nts-sidebar">
+      <div class="nts-sidebar-head">
+        <span class="nts-sidebar-title"><i class="fas fa-sticky-note"></i>&nbsp; Notas</span>
+        <button id="nts-new-btn" class="nts-new-btn" title="Nueva nota"><i class="fas fa-plus"></i></button>
+      </div>
+      <div id="nts-list" class="nts-list"></div>
+    </div>
+
+    <!-- Área principal de edición -->
+    <div class="nts-main">
+      <div id="nts-empty" class="nts-empty">
+        <i class="fas fa-book-open"></i>
+        <p style="font-size:.9rem;margin:0">Crea una nota para empezar</p>
+      </div>
+      <div id="nts-viewer" class="nts-editor-wrap" style="display:none"></div>
+      <div id="nts-editor" class="nts-editor-wrap" style="display:none">
+        <button id="nts-view-btn" class="nts-view-back-btn"><i class="fas fa-arrow-left"></i> Ver nota</button>
+        <input id="nts-titulo" class="nts-titulo-input" type="text" placeholder="Título de la nota…">
+        <div class="nts-color-row" id="nts-color-row"></div>
+        <div id="nts-toolbar" class="nts-toolbar">
+          <div class="nts-tb-group">
+            <button class="nts-tb-btn" data-cmd="bold" title="Negrita (Ctrl+B)"><b>B</b></button>
+            <button class="nts-tb-btn" data-cmd="italic" title="Cursiva (Ctrl+I)"><span style="font-style:italic;font-family:Georgia,serif">I</span></button>
+            <button class="nts-tb-btn" data-cmd="underline" title="Subrayado (Ctrl+U)"><u>U</u></button>
+            <button class="nts-tb-btn" data-cmd="strikeThrough" title="Tachado"><s>S</s></button>
+          </div>
+          <div class="nts-tb-sep"></div>
+          <div class="nts-tb-group">
+            <button class="nts-tb-btn" data-cmd="formatBlock" data-val="h2" title="Encabezado grande" style="font-weight:800;font-size:.75rem;letter-spacing:-.02em">H2</button>
+            <button class="nts-tb-btn" data-cmd="formatBlock" data-val="h3" title="Encabezado pequeño" style="font-weight:700;font-size:.72rem">H3</button>
+            <button class="nts-tb-btn" data-cmd="formatBlock" data-val="p" title="Párrafo normal" style="font-size:.85rem">¶</button>
+          </div>
+          <div class="nts-tb-sep"></div>
+          <div class="nts-tb-group">
+            <button class="nts-tb-btn" data-cmd="insertUnorderedList" title="Lista con viñetas"><i class="fas fa-list-ul"></i></button>
+            <button class="nts-tb-btn" data-cmd="insertOrderedList" title="Lista numerada"><i class="fas fa-list-ol"></i></button>
+            <button class="nts-tb-btn" data-cmd="indent" title="Aumentar sangría"><i class="fas fa-indent"></i></button>
+            <button class="nts-tb-btn" data-cmd="outdent" title="Disminuir sangría"><i class="fas fa-outdent"></i></button>
+          </div>
+          <div class="nts-tb-sep"></div>
+          <div class="nts-tb-group">
+            <button class="nts-tb-btn" id="nts-tb-code" title="Código en línea"><i class="fas fa-code"></i></button>
+            <button class="nts-tb-btn" data-cmd="removeFormat" title="Quitar formato"><i class="fas fa-eraser"></i></button>
+          </div>
+        </div>
+        <div id="nts-secciones"></div>
+        <button id="nts-add-sec" class="nts-add-sec-btn"><i class="fas fa-plus"></i> Nueva sección</button>
       </div>
     </div>
 
@@ -2040,13 +2253,15 @@
     // API Calls
     async function analyzePosition() {
         const fen = $('#fen-input').val();
-        showLoading("Stockfish está pensando...");
-        
+        const level = $('.sf-level-btn.active').data('level') || 'normal';
+        const levelLabels = { rapido: '~1s', normal: '~3s', profundo: '~8s', maximo: '~20s' };
+        showLoading(`Stockfish pensando (${levelLabels[level] || '3s'})...`);
+
         try {
             const response = await fetch('http://localhost:5000/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fen: fen })
+                body: JSON.stringify({ fen: fen, level: level })
             });
             
             const data = await response.json();
@@ -2283,21 +2498,25 @@
 
             if (tab === 'analysis') {
                 $('#section-analysis').show();
-                $('#section-exercises, #section-courses, #section-practices, #section-tracker').hide();
+                $('#section-exercises, #section-courses, #section-practices, #section-tracker, #section-notas').hide();
             } else if (tab === 'courses') {
-                $('#section-analysis, #section-exercises, #section-practices, #section-tracker').hide();
+                $('#section-analysis, #section-exercises, #section-practices, #section-tracker, #section-notas').hide();
                 $('#section-courses').show();
                 loadCursosSection();
             } else if (tab === 'practices') {
-                $('#section-analysis, #section-exercises, #section-courses, #section-tracker').hide();
+                $('#section-analysis, #section-exercises, #section-courses, #section-tracker, #section-notas').hide();
                 $('#section-practices').show();
                 initPracticasSection();
             } else if (tab === 'tracker') {
-                $('#section-analysis, #section-exercises, #section-courses, #section-practices').hide();
+                $('#section-analysis, #section-exercises, #section-courses, #section-practices, #section-notas').hide();
                 $('#section-tracker').show();
                 initTrackerTab();
+            } else if (tab === 'notas') {
+                $('#section-analysis, #section-exercises, #section-courses, #section-practices, #section-tracker').hide();
+                $('#section-notas').show();
+                initNotasTab();
             } else {
-                $('#section-analysis, #section-courses, #section-practices, #section-tracker').hide();
+                $('#section-analysis, #section-courses, #section-practices, #section-tracker, #section-notas').hide();
                 $('#section-exercises').show();
                 if (!pgnBoardReady) { initPgnBoard(); pgnBoardReady = true; }
                 if (tab === 'books') {
@@ -2911,10 +3130,22 @@
             $('.chapter-btn').removeClass('active').eq(idx).addClass('active');
             $('#pgn-game-title').text(pgnGames[idx].title);
             renderMoveList();
+            $('#pgn-moves-list').hide();
+            $('#pgn-show-solution').show().html('<i class="fas fa-eye"></i> Mostrar solución');
+            const _sc = pgnPositions.length >= 2 ? pgnPositions[1].color : 'w';
+            if (pgnBoardInstance) pgnBoardInstance.orientation(_sc === 'b' ? 'black' : 'white');
             updatePgnBoard();
-            showFeedback('waiting', '♟ Tu turno — mueve una pieza');
+            showFeedback('waiting', _sc === 'w' ? '⬜ Blancas comienzan &nbsp;·&nbsp; ♟ mueve una pieza' : '⬛ Negras comienzan &nbsp;·&nbsp; ♟ mueve una pieza');
             renderNoteCards(idx);
         }
+
+        $('#pgn-show-solution').on('click', function() {
+            const visible = $('#pgn-moves-list').is(':visible');
+            $('#pgn-moves-list').toggle();
+            $(this).html(visible
+                ? '<i class="fas fa-eye"></i> Mostrar solución'
+                : '<i class="fas fa-eye-slash"></i> Ocultar solución');
+        });
 
         // --- Move list rendering ---
         function renderMoveList() {
@@ -3104,6 +3335,11 @@
             board.position('start', false);
             updateFenFromBoard();
             resetStats();
+        });
+
+        $(document).on('click', '.sf-level-btn', function() {
+            $('.sf-level-btn').removeClass('active');
+            $(this).addClass('active');
         });
 
         $('#btn-analyze').click(() => analyzePosition());
@@ -3589,12 +3825,15 @@
                     pracIndex = 0;
                     $('#prac-game-title').text(game.title);
                     renderPracMoveList();
+                    $('#prac-moves-list').hide();
+                    $('#prac-show-solution').show().html('<i class="fas fa-eye"></i> Mostrar solución');
+                    const _psc = pracPositions.length >= 2 ? pracPositions[1].color : 'w';
+                    if (pracBoardInst) pracBoardInst.orientation(_psc === 'b' ? 'black' : 'white');
                     updatePracBoard();
                     $('#prac-nav-bar').show();
-                    const feedMsg = pracCurrentTaller
-                        ? '♟ Tu turno — encuentra la jugada'
-                        : '♟ Tu turno — encuentra el jaque mate';
-                    if (isEj) showPracFeedback('waiting', feedMsg);
+                    const _who = _psc === 'w' ? '⬜ Blancas comienzan' : '⬛ Negras comienzan';
+                    const _act = pracCurrentTaller ? 'encuentra la jugada' : 'encuentra el jaque mate';
+                    if (isEj) showPracFeedback('waiting', `${_who} &nbsp;·&nbsp; ♟ ${_act}`);
                 })
                 .catch(() => { $('#prac-moves-list').html('<div style="color:#e17055;text-align:center;padding:20px;">Error al cargar.</div>'); });
         }
@@ -3761,6 +4000,14 @@
         $('#btn-prac-ejercicio').click(() => {
             if (pracCurrentPatron && pracCurrentSet && pracCurrentSet.tipo === 'patrones')
                 loadPracChapter(pracCurrentPatron.ejercicio, 'ejercicio');
+        });
+
+        $('#prac-show-solution').on('click', function() {
+            const visible = $('#prac-moves-list').is(':visible');
+            $('#prac-moves-list').toggle();
+            $(this).html(visible
+                ? '<i class="fas fa-eye"></i> Mostrar solución'
+                : '<i class="fas fa-eye-slash"></i> Ocultar solución');
         });
 
         $('#btn-prac-lec-prev').click(() => {
@@ -4510,13 +4757,16 @@
                 coursesPositions.push({ fen: replay.fen(), label: color === 'w' ? `${moveNum}. ${san}` : `${moveNum}… ${san}` });
             });
             coursesIndex = 0;
+            const _csc = coursesPositions[0].fen.split(' ')[1] || 'w';
 
             if (!coursesBoardInstance) {
                 coursesBoardInstance = Chessboard('courses-board', {
                     position: coursesPositions[0].fen,
+                    orientation: _csc === 'b' ? 'black' : 'white',
                     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
                 });
             } else {
+                coursesBoardInstance.orientation(_csc === 'b' ? 'black' : 'white');
                 coursesBoardInstance.position(coursesPositions[0].fen, false);
             }
 
@@ -4561,6 +4811,387 @@
         });
 
         window.loadCursosSection = loadCursosSection;
+    }());
+
+    // ════════════════════════════════════════════════════════════════════
+    //   NOTAS (LIBRETAS)
+    // ════════════════════════════════════════════════════════════════════
+    (function() {
+        const NTS_COLORS = ['#00b894','#0984e3','#6c5ce7','#e17055','#fdcb6e','#fd79a8','#00cec9','#a29bfe'];
+        let ntsCurrentId  = null;
+        let ntsLibretas   = [];
+        const ntsTimers   = {};
+
+        window.initNotasTab = function() {
+            if (!window._ntsInited) {
+                $('#nts-new-btn').on('click', createLibreta);
+                $('#nts-add-sec').on('click', addSeccion);
+                $('#nts-titulo').on('input', onTituloInput);
+                $('#nts-view-btn').on('click', switchToViewMode);
+                // Toolbar: botones con data-cmd (execCommand)
+                $('#nts-toolbar .nts-tb-btn[data-cmd]').on('mousedown', function(e) {
+                    e.preventDefault();
+                    const cmd = $(this).data('cmd'), val = $(this).data('val') || null;
+                    document.execCommand(cmd, false, val);
+                    ntsUpdateToolbar();
+                });
+                // Código inline
+                $('#nts-tb-code').on('mousedown', function(e) {
+                    e.preventDefault();
+                    const sel = window.getSelection();
+                    if (sel && !sel.isCollapsed) {
+                        document.execCommand('insertHTML', false, `<code>${sel.toString()}</code>`);
+                    } else {
+                        document.execCommand('insertHTML', false, '<code>​</code>');
+                    }
+                    ntsUpdateToolbar();
+                });
+                // Actualizar estado activo al mover cursor / selección
+                document.addEventListener('selectionchange', ntsUpdateToolbar);
+                // Pegar solo texto plano dentro de editores ricos
+                $(document).on('paste', '.nts-rich-editor', function(e) {
+                    e.preventDefault();
+                    const html = e.originalEvent.clipboardData.getData('text/html');
+                    const text = e.originalEvent.clipboardData.getData('text/plain');
+                    document.execCommand('insertHTML', false, html || text.replace(/\n/g, '<br>'));
+                });
+                window._ntsInited = true;
+            }
+            loadLibretas();
+        };
+
+        async function loadLibretas() {
+            try {
+                const res = await fetch('/api/libretas');
+                ntsLibretas = await res.json();
+                renderSidebar();
+                if (ntsCurrentId) {
+                    const still = ntsLibretas.find(l => l.id === ntsCurrentId);
+                    if (still) openLibreta(ntsCurrentId);
+                    else { ntsCurrentId = null; showEmpty(); }
+                } else {
+                    showEmpty();
+                }
+            } catch(e) { console.error('loadLibretas:', e); }
+        }
+
+        function renderSidebar() {
+            const $list = $('#nts-list').empty();
+            if (!ntsLibretas.length) {
+                $list.html('<div style="padding:24px 16px;color:#4a5568;font-size:.82rem;text-align:center">Sin notas aún</div>');
+                return;
+            }
+            ntsLibretas.forEach(lib => {
+                const $item = $(`
+                    <div class="nts-item${ntsCurrentId===lib.id?' active':''}" data-id="${lib.id}" style="border-left-color:${lib.color}">
+                        <span class="nts-item-dot" style="background:${lib.color}"></span>
+                        <span class="nts-item-name">${escH(lib.titulo)}</span>
+                        <div class="nts-item-btns">
+                            <button class="nts-item-icon-btn nts-ib-edit" title="Editar nota"><i class="fas fa-pen"></i></button>
+                            <button class="nts-item-icon-btn nts-ib-del" title="Eliminar nota"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                `);
+                $item.on('click', function(e) {
+                    if ($(e.target).closest('.nts-item-btns').length) return;
+                    openLibreta(lib.id);
+                });
+                $item.find('.nts-ib-edit').on('click', () => {
+                    if (ntsCurrentId !== lib.id) openLibreta(lib.id).then(() => switchToEditMode());
+                    else switchToEditMode();
+                });
+                $item.find('.nts-ib-del').on('click', () => deleteLibreta(lib.id, lib.titulo));
+                $list.append($item);
+            });
+        }
+
+        function showEmpty() {
+            $('#nts-empty').show();
+            $('#nts-viewer, #nts-editor').hide();
+        }
+
+        async function openLibreta(id) {
+            ntsCurrentId = id;
+            const lib = ntsLibretas.find(l => l.id === id);
+            if (!lib) return;
+            $('.nts-item').removeClass('active');
+            $(`.nts-item[data-id="${id}"]`).addClass('active').css('border-left-color', lib.color);
+            $('#nts-empty, #nts-editor').hide();
+            try {
+                const res = await fetch(`/api/libretas/${id}/secciones`);
+                const secs = await res.json();
+                renderViewer(lib, secs);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderViewer(lib, secs) {
+            const $v = $('#nts-viewer').empty();
+            const $head = $('<div class="nts-viewer-head"></div>');
+            $head.append(`<h2 class="nts-viewer-title">${escH(lib.titulo)}</h2>`);
+            const $eb = $('<button class="nts-edit-btn"><i class="fas fa-pen"></i> Editar</button>');
+            $eb.on('click', switchToEditMode);
+            $head.append($eb);
+            $v.append($head);
+            const $colors = $('<div class="nts-viewer-colors"></div>');
+            NTS_COLORS.forEach(c => $colors.append(`<span class="nts-viewer-cdot${c===lib.color?' sel':''}" style="background:${c}"></span>`));
+            $v.append($colors);
+            if (!secs.length) {
+                $v.append('<p class="nts-art-hint">Sin secciones — haz clic en <strong>Editar</strong> para agregar contenido.</p>');
+            } else {
+                secs.forEach(sec => {
+                    const $sec = $('<div class="nts-art-sec"></div>');
+                    $sec.append(`<div class="nts-art-sec-head"><div class="nts-art-sec-bar" style="background:${lib.color}"></div><h3 class="nts-art-sec-title">${escH(sec.titulo)}</h3></div>`);
+                    if (sec.contenido && sec.contenido.trim()) {
+                        const $c = $('<div class="nts-art-content"></div>');
+                        $c[0].innerHTML = sec.contenido;
+                        $sec.append($c);
+                    }
+                    (sec.subs||[]).forEach(sub => {
+                        const $sub = $('<div class="nts-art-sub"></div>');
+                        $sub.append(`<h4 class="nts-art-sub-title">${escH(sub.titulo)}</h4>`);
+                        if (sub.contenido && sub.contenido.trim()) {
+                            const $sc = $('<div class="nts-art-sub-content"></div>');
+                            $sc[0].innerHTML = sub.contenido;
+                            $sub.append($sc);
+                        }
+                        $sec.append($sub);
+                    });
+                    $v.append($sec);
+                });
+            }
+            $v.show();
+        }
+
+        async function switchToEditMode() {
+            const lib = ntsLibretas.find(l => l.id === ntsCurrentId);
+            if (!lib) return;
+            $('#nts-viewer').hide();
+            $('#nts-editor').show();
+            $('#nts-titulo').val(lib.titulo);
+            renderColorRow(lib.color);
+            try {
+                const res = await fetch(`/api/libretas/${ntsCurrentId}/secciones`);
+                const secs = await res.json();
+                renderSecciones(secs);
+            } catch(e) { console.error(e); }
+        }
+
+        async function switchToViewMode() {
+            const lib = ntsLibretas.find(l => l.id === ntsCurrentId);
+            if (!lib) return;
+            $('#nts-editor').hide();
+            try {
+                const res = await fetch(`/api/libretas/${ntsCurrentId}/secciones`);
+                const secs = await res.json();
+                renderViewer(lib, secs);
+            } catch(e) { console.error(e); }
+        }
+
+        function renderColorRow(selected) {
+            const $row = $('#nts-color-row').empty();
+            NTS_COLORS.forEach(c => {
+                const $dot = $(`<span class="nts-color-dot${c===selected?' selected':''}" style="background:${c}" title="${c}"></span>`);
+                $dot.on('click', () => selectColor(c));
+                $row.append($dot);
+            });
+        }
+
+        function selectColor(color) {
+            const lib = ntsLibretas.find(l => l.id === ntsCurrentId);
+            if (!lib) return;
+            lib.color = color;
+            renderColorRow(color);
+            $(`.nts-item[data-id="${ntsCurrentId}"] .nts-item-dot`).css('background', color);
+            $(`.nts-item[data-id="${ntsCurrentId}"]`).css('border-left-color', color);
+            fetch(`/api/libretas/${ntsCurrentId}`, {
+                method: 'PUT', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({titulo: lib.titulo, color})
+            });
+        }
+
+        function renderSecciones(secs) {
+            const $wrap = $('#nts-secciones').empty();
+            secs.forEach(s => $wrap.append(buildSecCard(s)));
+        }
+
+        function buildSecCard(sec) {
+            const $card = $(`<div class="nts-sec-card" data-id="${sec.id}"></div>`);
+            $card.html(`
+                <div class="nts-sec-header">
+                    <i class="fas fa-chevron-down nts-sec-toggle"></i>
+                    <input class="nts-sec-title-input" type="text" value="${escH(sec.titulo)}" placeholder="Título de sección…">
+                    <div class="nts-sec-actions">
+                        <button class="nts-sec-action-btn add-sub-btn"><i class="fas fa-plus"></i> Sub-sección</button>
+                        <button class="nts-sec-action-btn del"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div class="nts-sec-body">
+                    <div class="nts-rich-editor" contenteditable="true" data-placeholder="Escribe el contenido de esta sección…"></div>
+                    <div class="nts-sub-list"></div>
+                    <button class="nts-add-sub-btn"><i class="fas fa-plus"></i> Sub-sección</button>
+                </div>
+            `);
+            $card.find('.nts-rich-editor')[0].innerHTML = sec.contenido || '';
+
+            const $subList = $card.find('.nts-sub-list');
+            (sec.subs||[]).forEach(sub => $subList.append(buildSubCard(sub)));
+
+            $card.find('.nts-sec-header').on('click', function(e) {
+                if ($(e.target).closest('button, input').length) return;
+                $card.toggleClass('collapsed');
+                $card.find('.nts-sec-body').slideToggle(160);
+            });
+
+            const $titleIn = $card.find('.nts-sec-title-input');
+            const $ed      = $card.find('.nts-rich-editor');
+
+            $titleIn.on('input', () => schedSave(sec.id, $titleIn.val(), $ed.html()))
+                    .on('click', e => e.stopPropagation());
+            $ed.on('input', () => schedSave(sec.id, $titleIn.val(), $ed.html()));
+
+            $card.find('.add-sub-btn, .nts-add-sub-btn').on('click', () => addSubSeccion(sec.id, $card));
+            $card.find('.nts-sec-action-btn.del').on('click', () => deleteSeccion(sec.id, $card));
+
+            return $card;
+        }
+
+        function buildSubCard(sub) {
+            const $card = $(`<div class="nts-sub-card" data-id="${sub.id}"></div>`);
+            $card.html(`
+                <div class="nts-sub-header">
+                    <i class="fas fa-chevron-down nts-sub-toggle"></i>
+                    <input class="nts-sub-title-input" type="text" value="${escH(sub.titulo)}" placeholder="Título de sub-sección…">
+                    <button class="nts-sub-del-btn" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                </div>
+                <div class="nts-sub-body">
+                    <div class="nts-rich-editor nts-sub-rich-editor" contenteditable="true" data-placeholder="Contenido…"></div>
+                </div>
+            `);
+            $card.find('.nts-rich-editor')[0].innerHTML = sub.contenido || '';
+
+            $card.find('.nts-sub-header').on('click', function(e) {
+                if ($(e.target).closest('button, input').length) return;
+                $card.toggleClass('collapsed');
+                $card.find('.nts-sub-body').slideToggle(160);
+            });
+
+            const $titleIn = $card.find('.nts-sub-title-input');
+            const $ed      = $card.find('.nts-rich-editor');
+
+            $titleIn.on('input', () => schedSave(sub.id, $titleIn.val(), $ed.html()))
+                    .on('click', e => e.stopPropagation());
+            $ed.on('input', () => schedSave(sub.id, $titleIn.val(), $ed.html()));
+
+            $card.find('.nts-sub-del-btn').on('click', () => deleteSeccion(sub.id, $card));
+
+            return $card;
+        }
+
+        function schedSave(id, titulo, contenido) {
+            clearTimeout(ntsTimers[id]);
+            ntsTimers[id] = setTimeout(() => {
+                fetch(`/api/lib_secciones/${id}`, {
+                    method: 'PUT', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({titulo, contenido})
+                });
+            }, 700);
+        }
+
+        async function addSeccion() {
+            if (!ntsCurrentId) return;
+            try {
+                const res = await fetch(`/api/libretas/${ntsCurrentId}/secciones`, {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({titulo:'Nueva sección', contenido:'', parent_id: null})
+                });
+                const sec = await res.json();
+                sec.subs = [];
+                const $card = buildSecCard(sec);
+                $('#nts-secciones').append($card);
+                setTimeout(() => { $card.find('.nts-sec-title-input').focus().select(); }, 80);
+            } catch(e) { console.error(e); }
+        }
+
+        async function addSubSeccion(parentId, $parentCard) {
+            if (!ntsCurrentId) return;
+            try {
+                const res = await fetch(`/api/libretas/${ntsCurrentId}/secciones`, {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({titulo:'Nueva sub-sección', contenido:'', parent_id: parentId})
+                });
+                const sub = await res.json();
+                const $subCard = buildSubCard(sub);
+                $parentCard.find('.nts-sub-list').append($subCard);
+                $parentCard.find('.nts-sec-body').show();
+                $parentCard.removeClass('collapsed');
+                setTimeout(() => $subCard.find('.nts-sub-title-input').focus().select(), 80);
+            } catch(e) { console.error(e); }
+        }
+
+        async function deleteLibreta(id, titulo) {
+            if (!confirm(`¿Eliminar la nota "${titulo}"?`)) return;
+            await fetch(`/api/libretas/${id}`, {method:'DELETE'});
+            if (ntsCurrentId === id) { ntsCurrentId = null; showEmpty(); }
+            ntsLibretas = ntsLibretas.filter(l => l.id !== id);
+            renderSidebar();
+        }
+
+        async function deleteSeccion(id, $card) {
+            await fetch(`/api/lib_secciones/${id}`, {method:'DELETE'});
+            $card.slideUp(150, () => $card.remove());
+        }
+
+        async function createLibreta() {
+            try {
+                const res = await fetch('/api/libretas', {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({titulo:'Nueva nota', color: NTS_COLORS[0]})
+                });
+                const lib = await res.json();
+                ntsLibretas.unshift(lib);
+                renderSidebar();
+                await openLibreta(lib.id);
+                switchToEditMode();
+                setTimeout(() => $('#nts-titulo').focus().select(), 160);
+            } catch(e) { console.error(e); }
+        }
+
+        function onTituloInput() {
+            const titulo = $(this).val();
+            const lib = ntsLibretas.find(l => l.id === ntsCurrentId);
+            if (!lib) return;
+            lib.titulo = titulo;
+            $(`.nts-item[data-id="${ntsCurrentId}"] .nts-item-name`).text(titulo);
+            clearTimeout(ntsTimers['__title__']);
+            ntsTimers['__title__'] = setTimeout(() => {
+                fetch(`/api/libretas/${ntsCurrentId}`, {
+                    method: 'PUT', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({titulo, color: lib.color})
+                });
+            }, 700);
+        }
+
+        function ntsUpdateToolbar() {
+            // Solo actualizar si un editor rico está activo
+            const ae = document.activeElement;
+            if (!ae || !ae.classList.contains('nts-rich-editor')) return;
+            const cmds = ['bold','italic','underline','strikeThrough','insertUnorderedList','insertOrderedList'];
+            cmds.forEach(cmd => {
+                try { $(`#nts-toolbar .nts-tb-btn[data-cmd="${cmd}"]`).toggleClass('active', document.queryCommandState(cmd)); }
+                catch(e) {}
+            });
+        }
+
+        function ntsAutoResize(el) {
+            if (!el) return;
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+
+        function escH(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
     }());
 </script>
 

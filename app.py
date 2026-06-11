@@ -80,8 +80,12 @@ def analyze():
             if "readyok" in line:
                 break
 
+        level = data.get('level', 'normal')
+        movetime_map = {'rapido': 1000, 'normal': 3000, 'profundo': 8000, 'maximo': 20000}
+        movetime = movetime_map.get(level, 3000)
+
         send_command(f"position fen {fen}")
-        send_command("go movetime 3000")
+        send_command(f"go movetime {movetime}")
 
         analysis = {"bestmove": None, "depth": 0, "score_cp": 0, "pv": ""}
 
@@ -516,6 +520,132 @@ def delete_nota(note_id):
     except Exception as e:
         return jsonify({"errors": str(e)}), 500
 
+# ═══════════════════════════════════════════════════
+#   LIBRETAS (Notas con secciones y sub-secciones)
+# ═══════════════════════════════════════════════════
+
+@app.route('/api/libretas', methods=['GET'])
+def get_libretas():
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT * FROM libretas ORDER BY updated_at DESC")
+        rows = cur.fetchall()
+        for r in rows:
+            r['created_at'] = r['created_at'].isoformat()
+            r['updated_at'] = r['updated_at'].isoformat()
+        cur.close(); conn.close()
+        return jsonify(rows)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/libretas', methods=['POST'])
+def create_libreta():
+    try:
+        data = request.get_json()
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("INSERT INTO libretas (titulo, color) VALUES (%s,%s)",
+                    (data.get('titulo', 'Nueva nota'), data.get('color', '#00b894')))
+        conn.commit()
+        lid = cur.lastrowid
+        cur.execute("SELECT * FROM libretas WHERE id=%s", (lid,))
+        row = cur.fetchone()
+        row['created_at'] = row['created_at'].isoformat()
+        row['updated_at'] = row['updated_at'].isoformat()
+        cur.close(); conn.close()
+        return jsonify(row), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/libretas/<int:lid>', methods=['PUT'])
+def update_libreta(lid):
+    try:
+        data = request.get_json()
+        conn = get_db(); cur = conn.cursor()
+        cur.execute("UPDATE libretas SET titulo=%s, color=%s, updated_at=CURRENT_TIMESTAMP WHERE id=%s",
+                    (data.get('titulo'), data.get('color'), lid))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/libretas/<int:lid>', methods=['DELETE'])
+def delete_libreta(lid):
+    try:
+        conn = get_db(); cur = conn.cursor()
+        cur.execute("DELETE FROM libretas WHERE id=%s", (lid,))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/libretas/<int:lid>/secciones', methods=['GET'])
+def get_lib_secciones(lid):
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT * FROM libretas_secciones WHERE libreta_id=%s ORDER BY orden, id", (lid,))
+        rows = cur.fetchall()
+        top = [r for r in rows if r['parent_id'] is None]
+        for s in top:
+            s['subs'] = [r for r in rows if r['parent_id'] == s['id']]
+            for sub in s['subs']:
+                sub['created_at'] = sub['created_at'].isoformat()
+                sub['updated_at'] = sub['updated_at'].isoformat()
+            s['created_at'] = s['created_at'].isoformat()
+            s['updated_at'] = s['updated_at'].isoformat()
+        cur.close(); conn.close()
+        return jsonify(top)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/libretas/<int:lid>/secciones', methods=['POST'])
+def add_lib_seccion(lid):
+    try:
+        data = request.get_json()
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("INSERT INTO libretas_secciones (libreta_id,parent_id,titulo,contenido,orden) VALUES (%s,%s,%s,%s,%s)",
+                    (lid, data.get('parent_id'), data.get('titulo','Nueva sección'), data.get('contenido',''), data.get('orden',0)))
+        conn.commit()
+        sid = cur.lastrowid
+        cur.execute("UPDATE libretas SET updated_at=CURRENT_TIMESTAMP WHERE id=%s", (lid,))
+        conn.commit()
+        cur.execute("SELECT * FROM libretas_secciones WHERE id=%s", (sid,))
+        row = cur.fetchone()
+        row['subs'] = []
+        row['created_at'] = row['created_at'].isoformat()
+        row['updated_at'] = row['updated_at'].isoformat()
+        cur.close(); conn.close()
+        return jsonify(row), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/lib_secciones/<int:sid>', methods=['PUT'])
+def update_lib_seccion(sid):
+    try:
+        data = request.get_json()
+        conn = get_db(); cur = conn.cursor()
+        cur.execute("UPDATE libretas_secciones SET titulo=%s, contenido=%s, updated_at=CURRENT_TIMESTAMP WHERE id=%s",
+                    (data.get('titulo'), data.get('contenido',''), sid))
+        cur.execute("""UPDATE libretas l JOIN libretas_secciones s ON s.libreta_id=l.id
+                       SET l.updated_at=CURRENT_TIMESTAMP WHERE s.id=%s""", (sid,))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/lib_secciones/<int:sid>', methods=['DELETE'])
+def delete_lib_seccion(sid):
+    try:
+        conn = get_db(); cur = conn.cursor()
+        cur.execute("DELETE FROM libretas_secciones WHERE id=%s OR parent_id=%s", (sid, sid))
+        conn.commit()
+        cur.close(); conn.close()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/cursos')
 def api_cursos():
     try:
@@ -770,23 +900,63 @@ def agregar_lecciones_a_taller(taller_id):
     conn.commit(); cur.close(); conn.close()
     return jsonify({'added': len(lecciones)})
 
+def _pgn_cache_get(ref_key):
+    try:
+        conn = get_db(); cur = conn.cursor(dictionary=True)
+        cur.execute("SELECT pgn FROM pgn_cache WHERE ref_key=%s", (ref_key,))
+        row = cur.fetchone()
+        cur.close(); conn.close()
+        return row['pgn'] if row else None
+    except Exception:
+        return None
+
+def _pgn_cache_set(ref_key, pgn):
+    try:
+        conn = get_db(); cur = conn.cursor()
+        cur.execute("""INSERT INTO pgn_cache (ref_key, pgn) VALUES (%s, %s)
+                       ON DUPLICATE KEY UPDATE pgn=%s, updated_at=CURRENT_TIMESTAMP""",
+                    (ref_key, pgn, pgn))
+        conn.commit(); cur.close(); conn.close()
+    except Exception:
+        pass
+
 @app.route('/proxy/lichess-study/<study_id>')
 def proxy_lichess_study(study_id):
     import urllib.request
+    key = f'study:{study_id}'
+    cached = _pgn_cache_get(key)
+    if cached:
+        return jsonify({'data': {'pgn': cached}})
     url = f'https://lichess.org/study/{study_id}.pgn'
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/x-chess-pgn'})
     with urllib.request.urlopen(req, timeout=15) as resp:
         pgn = resp.read().decode('utf-8')
+    _pgn_cache_set(key, pgn)
     return jsonify({'data': {'pgn': pgn}})
 
 @app.route('/proxy/lichess-chapter/<study_id>/<chapter_id>')
 def proxy_lichess_chapter(study_id, chapter_id):
     import urllib.request
+    key = f'chapter:{study_id}/{chapter_id}'
+    cached = _pgn_cache_get(key)
+    if cached:
+        return jsonify({'data': {'pgn': cached}})
     url = f'https://lichess.org/study/{study_id}/{chapter_id}.pgn'
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Accept': 'application/x-chess-pgn'})
     with urllib.request.urlopen(req, timeout=10) as resp:
         pgn = resp.read().decode('utf-8')
+    _pgn_cache_set(key, pgn)
     return jsonify({'data': {'pgn': pgn}})
+
+@app.route('/api/pgn-cache/<path:ref_key>', methods=['DELETE'])
+def pgn_cache_delete(ref_key):
+    try:
+        conn = get_db(); cur = conn.cursor()
+        cur.execute("DELETE FROM pgn_cache WHERE ref_key=%s", (ref_key,))
+        conn.commit(); cur.close(); conn.close()
+        return jsonify({'deleted': cur.rowcount > 0})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # =====================================================================
@@ -1145,7 +1315,44 @@ def tracker_revision():
         return jsonify({'error': str(e)}), 500
 
 
+def init_pgn_cache_db():
+    conn = get_db(); cur = conn.cursor()
+    cur.execute("""CREATE TABLE IF NOT EXISTS pgn_cache (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        ref_key VARCHAR(200) NOT NULL UNIQUE,
+        pgn MEDIUMTEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )""")
+    conn.commit(); cur.close(); conn.close()
+
+def init_libretas_db():
+    conn = get_db(); cur = conn.cursor()
+    cur.execute("""CREATE TABLE IF NOT EXISTS libretas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        titulo VARCHAR(255) NOT NULL DEFAULT 'Nueva nota',
+        color VARCHAR(20) DEFAULT '#00b894',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS libretas_secciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        libreta_id INT NOT NULL,
+        parent_id INT DEFAULT NULL,
+        titulo VARCHAR(255) NOT NULL DEFAULT 'Nueva sección',
+        contenido TEXT,
+        orden INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (libreta_id) REFERENCES libretas(id) ON DELETE CASCADE,
+        FOREIGN KEY (parent_id) REFERENCES libretas_secciones(id) ON DELETE CASCADE
+    )""")
+    conn.commit()
+    cur.close(); conn.close()
+
 if __name__ == '__main__':
     init_tracker_db()
+    init_libretas_db()
+    init_pgn_cache_db()
     print("Servidor de Ajedrez con Gemini iniciado en http://localhost:5000")
     app.run(host='0.0.0.0', debug=True, port=5000)
