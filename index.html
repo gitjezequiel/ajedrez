@@ -29,16 +29,47 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            flex-direction: row;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        header {
-            background-color: var(--bg-deep);
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            position: relative;
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 200px;
+            min-width: 200px;
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.35);
+            z-index: 50;
+            flex-shrink: 0;
+        }
+        .sidebar-logo {
+            padding: 18px 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-logo i { color: var(--accent); font-size: 1.3rem; }
+        .sidebar-logo span { font-size: 0.82rem; font-weight: 700; color: #dfe6e9; line-height: 1.3; }
+        .sidebar-nav {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 0;
+            overflow-y: auto;
+        }
+        .sidebar-bottom {
+            padding: 12px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            height: 100vh;
         }
 
         .container {
@@ -419,12 +450,8 @@
             word-break: break-all;
         }
 
-        /* Nueva Partida button in header */
         #btn-new-game {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            width: 100%;
             background: var(--accent);
             color: #fff;
             border: none;
@@ -438,7 +465,8 @@
             gap: 6px;
             transition: background 0.2s, transform 0.1s;
         }
-        #btn-new-game:hover { background: #00a381; transform: translateY(-50%) scale(1.03); }
+        #btn-new-game:hover { background: #00a381; }
+        #btn-new-game { border-radius: 8px; justify-content: center; padding: 9px 12px; border: none; color: #fff; }
 
         /* Coach Report Panel */
         #coach-panel {
@@ -708,26 +736,26 @@
             }
         }
 
-        /* ===== TAB NAV ===== */
-        .tab-bar {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            margin-top: 10px;
-        }
+        /* ===== SIDEBAR NAV ITEMS ===== */
         .tab-btn {
-            background: rgba(255,255,255,0.08);
-            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: transparent;
             border: none;
-            padding: 7px 24px;
-            border-radius: 20px;
-            font-size: 0.88rem;
-            font-weight: 600;
+            border-left: 3px solid transparent;
+            color: rgba(255,255,255,0.45);
+            font-size: 0.85rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
+            width: 100%;
+            text-align: left;
         }
-        .tab-btn.active { background: var(--accent); color: #fff; }
-        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.15); color: #fff; }
+        .tab-btn i { width: 16px; text-align: center; font-size: 0.9rem; }
+        .tab-btn.active { background: rgba(0,184,148,0.12); color: var(--accent); border-left-color: var(--accent); }
+        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.06); color: #dfe6e9; }
 
         /* ===== EXERCISES SECTION ===== */
         .right-col-ex {
@@ -1251,19 +1279,26 @@
 </head>
 <body>
 
-<header>
-    <h1><i class="fas fa-chess-knight"></i> Asistente de Ajedrez Pro</h1>
-    <nav class="tab-bar">
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <i class="fas fa-chess-knight"></i>
+        <span>Ajedrez<br>Pro</span>
+    </div>
+    <nav class="sidebar-nav">
         <button class="tab-btn active" data-tab="analysis"><i class="fas fa-microchip"></i> Análisis</button>
         <button class="tab-btn" data-tab="exercises"><i class="fas fa-book-open"></i> Ejercicios</button>
         <button class="tab-btn" data-tab="books"><i class="fas fa-book"></i> Libros</button>
         <button class="tab-btn" data-tab="courses" style="display:none"><i class="fas fa-graduation-cap"></i> Cursos</button>
         <button class="tab-btn" data-tab="practices"><i class="fas fa-dumbbell"></i> Prácticas</button>
         <button class="tab-btn" data-tab="tracker"><i class="fas fa-calendar-alt"></i> 12 Semanas</button>
-        <button class="tab-btn" data-tab="notas"><i class="fas fa-book-open"></i> Notas</button>
+        <button class="tab-btn" data-tab="notas"><i class="fas fa-sticky-note"></i> Notas</button>
     </nav>
-    <button id="btn-new-game"><i class="fas fa-plus"></i> Nueva Partida</button>
-</header>
+    <div class="sidebar-bottom">
+        <button id="btn-new-game"><i class="fas fa-plus"></i> Nueva Partida</button>
+    </div>
+</aside>
+
+<div class="app-content">
 
 <div id="loading-overlay">
     <div class="spinner" style="width: 50px; height: 50px;"></div>
@@ -5228,5 +5263,6 @@
   </div>
 </div>
 
+</div><!-- /app-content -->
 </body>
 </html>
